@@ -49,4 +49,32 @@ public class InstitutionDaoImpl implements InstitutionDao {
 		return in;
 
 	}
+
+	@Override
+	public Institution saveInstituion(Institution body) {
+		Session currentSession = entityManager.unwrap(Session.class);
+		currentSession.saveOrUpdate(body);
+		return body;
+	}
+
+	@Override
+	public Institution getInstitutionByName(String name) {
+		Session session = entityManager.unwrap(Session.class);
+		Query theQuery = session.createQuery("from Institution where institutionName=:name");
+		theQuery.setParameter("name", name);
+		Institution i = (Institution) theQuery.getSingleResult();
+		if (i.getInstitutionName().equals(name)) {
+			return i;
+		}
+
+		return null;
+	}
+
+	@Override
+	public void deleteInstitution(int id) {
+		Session session = entityManager.unwrap(Session.class);
+		Query theQuery = session.createQuery("delete from Institution where institutionId=:id");
+		theQuery.setParameter("id", id);
+		theQuery.executeUpdate();
+	}
 }

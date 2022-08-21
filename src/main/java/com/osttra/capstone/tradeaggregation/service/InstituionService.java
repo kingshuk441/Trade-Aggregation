@@ -2,6 +2,7 @@ package com.osttra.capstone.tradeaggregation.service;
 
 import com.osttra.capstone.tradeaggregation.entity.CustomResponse;
 import com.osttra.capstone.tradeaggregation.entity.Institution;
+import com.osttra.capstone.tradeaggregation.entity.InstitutionBody;
 import com.osttra.capstone.tradeaggregation.entity.Party;
 
 public interface InstituionService {
@@ -12,4 +13,12 @@ public interface InstituionService {
 	public CustomResponse<Party> getParties(int id);
 
 	public CustomResponse<Institution> addParty(int id, int partyId);
+
+	public CustomResponse<Institution> addInstituion(Institution body);
+
+	public CustomResponse<Institution> getInstitutionByName(String name);
+
+	public CustomResponse<Institution> updateInstitution(int id, InstitutionBody body);
+
+	public CustomResponse<Institution> deleteInstitution(int id);
 }

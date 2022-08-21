@@ -1,11 +1,10 @@
 package com.osttra.capstone.tradeaggregation.service;
 
-import java.util.List;
-
+import com.osttra.capstone.tradeaggregation.entity.CustomResponse;
 import com.osttra.capstone.tradeaggregation.entity.Party;
 
 public interface PartyService {
-	public List<Party> getParties();
+	public CustomResponse<Party> getParties();
 
-	public Party getParty(int id);
+	public CustomResponse<Party> getParty(int id);
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -25,13 +26,21 @@ public class Institution {
 	@Column(name = "institution_name")
 	private String institutionName;
 
-	@OneToMany(cascade = CascadeType.ALL)
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
 	@JoinColumn(name = "i_id")
 	@JsonManagedReference
 	private List<Party> allParties;
 
 	public Institution() {
 
+	}
+
+	public Institution(Institution i) {
+		List<Party> p = i.getAllParties();
+		List<Party> np = new ArrayList<>(p);
+		this.allParties = np;
+		this.institutionId = i.getInstitutionId();
+		this.institutionName = i.getInstitutionName();
 	}
 
 	public Institution(String institutionName) {

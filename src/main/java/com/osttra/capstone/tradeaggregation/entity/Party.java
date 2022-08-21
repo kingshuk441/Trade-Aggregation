@@ -1,6 +1,5 @@
 package com.osttra.capstone.tradeaggregation.entity;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -22,7 +21,7 @@ public class Party {
 	@Column(name = "party_name")
 	private String partyName;
 
-	@OneToOne(cascade = CascadeType.ALL)
+	@OneToOne
 	@JoinColumn(name = "i_id")
 	@JsonBackReference
 	private Institution institution;

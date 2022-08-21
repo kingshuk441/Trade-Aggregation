@@ -1,5 +1,7 @@
 package com.osttra.capstone.tradeaggregation.service;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,11 +9,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.osttra.capstone.tradeaggregation.controller.FoundException;
 import com.osttra.capstone.tradeaggregation.controller.NotFoundException;
 import com.osttra.capstone.tradeaggregation.dao.InstitutionDao;
 import com.osttra.capstone.tradeaggregation.dao.PartyDao;
 import com.osttra.capstone.tradeaggregation.entity.CustomResponse;
 import com.osttra.capstone.tradeaggregation.entity.Institution;
+import com.osttra.capstone.tradeaggregation.entity.InstitutionBody;
 import com.osttra.capstone.tradeaggregation.entity.Party;
 
 @Service
@@ -61,7 +65,82 @@ public class InstitutionServiceImpl implements InstituionService {
 		if (i == null) {
 			throw new RuntimeException("already added!");
 		}
-		return new CustomResponse<>("added successfully!", HttpStatus.ACCEPTED.value(), i);
+		return new CustomResponse<>("party added successfully!", HttpStatus.ACCEPTED.value(), i);
 
 	}
+
+	@Override
+	@Transactional
+	public CustomResponse<Institution> addInstituion(Institution body) {
+		String name = body.getInstitutionName();
+		this.getInstituteNameHelper(name);
+		body.setInstitutionId(0);
+		Institution i = this.institutionDao.saveInstituion(body);
+		return new CustomResponse<>("institution added successfully!", HttpStatus.ACCEPTED.value(), i);
+	}
+
+	private void getInstituteNameHelper(String s) {
+		try {
+			CustomResponse<Institution> res = this.getInstitutionByName(s);
+		} catch (Exception e) {
+			System.out.println("not found");
+			return;
+		}
+		throw new FoundException("institution already found!");
+	}
+
+	@Override
+	@Transactional
+	public CustomResponse<Institution> getInstitutionByName(String name) {
+		Institution i = this.institutionDao.getInstitutionByName(name);
+		if (i == null) {
+			throw new NotFoundException("Institution with name " + name + " not found!");
+		}
+
+		return new CustomResponse<>("Institute fetched successfully!", HttpStatus.ACCEPTED.value(), i);
+	}
+
+	@Override
+	@Transactional
+	public CustomResponse<Institution> updateInstitution(int id, InstitutionBody body) {
+		Institution i = this.institutionDao.getInstitution(id);
+		if (i == null) {
+			throw new NotFoundException("Institution with id " + id + " not found!");
+		}
+		if (body.getInstitutionName() != null) {
+			i.setInstitutionName(body.getInstitutionName());
+		}
+		if (body.getParties() != null) {
+			HashSet<Integer> vis = new HashSet<>();
+			List<Party> addParties = new ArrayList<>();
+			for (int idx : body.getParties()) {
+				Party p = this.partyDao.getParty(idx);
+				addParties.add(p);
+				vis.add(idx);
+			}
+			for (Party p : i.getAllParties()) {
+				if (vis.contains(p.getPartyId()) == false) {
+					addParties.add(p);
+					vis.add(p.getPartyId());
+				}
+			}
+			i.setAllParties(addParties);
+		}
+		Institution updatedInstitution = this.institutionDao.saveInstituion(i);
+		return new CustomResponse<>("Institute updated successfully!", HttpStatus.ACCEPTED.value(), updatedInstitution);
+	}
+
+	@Override
+	@Transactional
+	public CustomResponse<Institution> deleteInstitution(int id) {
+		Institution i = this.institutionDao.getInstitution(id);
+		if (i == null) {
+			throw new NotFoundException("Institution with id " + id + " not found!");
+		}
+		Institution d = new Institution(i);
+		this.institutionDao.deleteInstitution(id);
+
+		return new CustomResponse<>("Institute deleted successfully!", HttpStatus.ACCEPTED.value(), d);
+	}
+
 }
