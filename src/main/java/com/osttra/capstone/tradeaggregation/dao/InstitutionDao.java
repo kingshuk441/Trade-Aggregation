@@ -14,7 +14,7 @@ public interface InstitutionDao {
 
 	public Institution addParty(int id, Party p);
 
-	public Institution saveInstituion(Institution body);
+	public Institution saveInstitution(Institution body);
 
 	public Institution getInstitutionByName(String name);
 

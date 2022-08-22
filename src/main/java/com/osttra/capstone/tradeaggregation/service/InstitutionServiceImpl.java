@@ -19,7 +19,7 @@ import com.osttra.capstone.tradeaggregation.entity.InstitutionBody;
 import com.osttra.capstone.tradeaggregation.entity.Party;
 
 @Service
-public class InstitutionServiceImpl implements InstituionService {
+public class InstitutionServiceImpl implements InstitutionService {
 	@Autowired
 	private InstitutionDao institutionDao;
 	@Autowired
@@ -71,11 +71,22 @@ public class InstitutionServiceImpl implements InstituionService {
 
 	@Override
 	@Transactional
-	public CustomResponse<Institution> addInstituion(Institution body) {
+	public CustomResponse<Institution> addInstitution(InstitutionBody body) {
 		String name = body.getInstitutionName();
 		this.getInstituteNameHelper(name);
-		body.setInstitutionId(0);
-		Institution i = this.institutionDao.saveInstituion(body);
+		Institution i = new Institution();
+		i.setInstitutionId(0);
+		i.setInstitutionName(name);
+		HashSet<Integer> set = new HashSet<>();
+		for (int idx : body.getParties()) {
+			if (set.contains(idx) == false) {
+				set.add(idx);
+				Party p = this.partyDao.getParty(idx);
+				i.addParty(p);
+			}
+		}
+
+		i = this.institutionDao.saveInstitution(i);
 		return new CustomResponse<>("institution added successfully!", HttpStatus.ACCEPTED.value(), i);
 	}
 
@@ -126,7 +137,7 @@ public class InstitutionServiceImpl implements InstituionService {
 			}
 			i.setAllParties(addParties);
 		}
-		Institution updatedInstitution = this.institutionDao.saveInstituion(i);
+		Institution updatedInstitution = this.institutionDao.saveInstitution(i);
 		return new CustomResponse<>("Institute updated successfully!", HttpStatus.ACCEPTED.value(), updatedInstitution);
 	}
 
@@ -141,6 +152,27 @@ public class InstitutionServiceImpl implements InstituionService {
 		this.institutionDao.deleteInstitution(id);
 
 		return new CustomResponse<>("Institute deleted successfully!", HttpStatus.ACCEPTED.value(), d);
+	}
+
+	@Override
+	@Transactional
+	public CustomResponse<Institution> removeParty(int id, int partyId) {
+		Institution i = this.institutionDao.getInstitution(id);
+		if (i == null) {
+			throw new NotFoundException("Institution with id " + id + " not found!");
+		}
+		List<Party> allParties = i.getAllParties();
+		for (int j = 0; j < allParties.size(); j++) {
+			Party p = allParties.get(j);
+			if (p.getPartyId() == partyId) {
+				Party t2 = allParties.get(allParties.size() - 1);
+				allParties.set(j, t2);
+				allParties.remove(allParties.size() - 1);
+				i = this.institutionDao.saveInstitution(i);
+				return new CustomResponse<>("Party deleted successfully!", HttpStatus.ACCEPTED.value(), i);
+			}
+		}
+		throw new NotFoundException("Party with id " + partyId + " not found!");
 	}
 
 }

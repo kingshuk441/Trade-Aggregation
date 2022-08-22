@@ -51,7 +51,7 @@ public class InstitutionDaoImpl implements InstitutionDao {
 	}
 
 	@Override
-	public Institution saveInstituion(Institution body) {
+	public Institution saveInstitution(Institution body) {
 		Session currentSession = entityManager.unwrap(Session.class);
 		currentSession.saveOrUpdate(body);
 		return body;
@@ -62,7 +62,9 @@ public class InstitutionDaoImpl implements InstitutionDao {
 		Session session = entityManager.unwrap(Session.class);
 		Query theQuery = session.createQuery("from Institution where institutionName=:name");
 		theQuery.setParameter("name", name);
-		Institution i = (Institution) theQuery.getSingleResult();
+		Institution i = (Institution) theQuery.getResultList().stream().findFirst().orElse(null);
+		if (i == null)
+			return null;
 		if (i.getInstitutionName().equals(name)) {
 			return i;
 		}

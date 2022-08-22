@@ -31,4 +31,26 @@ public class PartyDaoImpl implements PartyDao {
 
 	}
 
+	@Override
+	public Party save(Party party) {
+		Session session = entityManager.unwrap(Session.class);
+		session.saveOrUpdate(party);
+		return party;
+	}
+
+	@Override
+	public Party getPartyByName(String name) {
+		Session session = entityManager.unwrap(Session.class);
+		Query theQuery = session.createQuery("from Party where partyName=:name");
+		theQuery.setParameter("name", name);
+		Party p = (Party) theQuery.getResultList().stream().findFirst().orElse(null);
+		if (p == null)
+			return null;
+		if (p.getPartyName().equals(name)) {
+			return p;
+		}
+
+		return null;
+	}
+
 }

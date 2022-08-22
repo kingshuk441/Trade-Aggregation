@@ -9,6 +9,7 @@ import com.osttra.capstone.tradeaggregation.entity.CustomErrorResponse;
 
 @ControllerAdvice
 public class RestExceptionHandler {
+
 	@ExceptionHandler
 	public ResponseEntity<CustomErrorResponse> handleException(NotFoundException ex) {
 		CustomErrorResponse c = new CustomErrorResponse();

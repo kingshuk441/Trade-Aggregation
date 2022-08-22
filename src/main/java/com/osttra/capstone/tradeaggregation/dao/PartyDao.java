@@ -9,4 +9,8 @@ public interface PartyDao {
 
 	public Party getParty(int id);
 
+	public Party save(Party party);
+
+	public Party getPartyByName(String name);
+
 }
