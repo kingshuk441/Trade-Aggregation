@@ -3,17 +3,19 @@ package com.osttra.capstone.tradeaggregation.entity;
 public class PartyBody {
 	private int id;
 	private String partyName;
+	private String partyFullName;
 	private int institution;
 
 	public PartyBody() {
 
 	}
 
-	public PartyBody(int id, String partyName, int institution) {
+	public PartyBody(int id, String partyName, String partyFullName, int institution) {
 		super();
 		this.id = id;
 		this.partyName = partyName;
 		this.institution = institution;
+		this.partyFullName = partyFullName;
 	}
 
 	public int getId() {
@@ -40,9 +42,18 @@ public class PartyBody {
 		this.institution = institution;
 	}
 
+	public String getPartyFullName() {
+		return partyFullName;
+	}
+
+	public void setPartyFullName(String partyFullName) {
+		this.partyFullName = partyFullName;
+	}
+
 	@Override
 	public String toString() {
-		return "PartyBody [id=" + id + ", partyName=" + partyName + ", institution=" + institution + "]";
+		return "PartyBody [id=" + id + ", partyName=" + partyName + ", partyFullName=" + partyFullName
+				+ ", institution=" + institution + "]";
 	}
 
 }

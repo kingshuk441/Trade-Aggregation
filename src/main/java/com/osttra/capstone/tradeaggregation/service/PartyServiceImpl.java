@@ -68,6 +68,7 @@ public class PartyServiceImpl implements PartyService {
 		this.getPartyNameHelper(name);
 		Party p = new Party();
 		p.setPartyName(name);
+		p.setPartyFullName(party.getPartyFullName());
 		int institutionId = party.getInstitution();
 		Institution i = this.institutionDao.getInstitution(institutionId);
 		if (i == null) {
@@ -87,5 +88,43 @@ public class PartyServiceImpl implements PartyService {
 		}
 
 		return new CustomResponse<>("Party fetched successfully!", HttpStatus.ACCEPTED.value(), p);
+	}
+
+	@Override
+	@Transactional
+	public CustomResponse<Party> updateParty(int id, PartyBody party) {
+		Party p = this.partyDao.getParty(id);
+		if (p == null) {
+			throw new NotFoundException("party with id " + id + " not found!");
+		}
+		String name = party.getPartyName();
+		int institutionId = party.getInstitution();
+
+		if (institutionId != 0) {
+			Institution i = this.institutionDao.getInstitution(institutionId);
+			if (i == null) {
+				throw new NotFoundException("Institution with id " + id + " not found!");
+			}
+			p.setInstitution(i);
+		}
+		if (name != null) {
+			p.setPartyName(name);
+		}
+		if (party.getPartyFullName() != null) {
+			p.setPartyFullName(party.getPartyFullName());
+		}
+		p = this.partyDao.save(p);
+		return new CustomResponse<>("Party Updated successfully!", HttpStatus.ACCEPTED.value(), p);
+	}
+
+	@Override
+	@Transactional
+	public CustomResponse<Party> deleteParty(int id) {
+		Party p = this.partyDao.getParty(id);
+		if (p == null) {
+			throw new NotFoundException("party with id " + id + " not found!");
+		}
+		this.partyDao.deleteParty(id);
+		return new CustomResponse<>("Party Deleted successfully!", HttpStatus.ACCEPTED.value(), p);
 	}
 }

@@ -78,11 +78,13 @@ public class InstitutionServiceImpl implements InstitutionService {
 		i.setInstitutionId(0);
 		i.setInstitutionName(name);
 		HashSet<Integer> set = new HashSet<>();
-		for (int idx : body.getParties()) {
-			if (set.contains(idx) == false) {
-				set.add(idx);
-				Party p = this.partyDao.getParty(idx);
-				i.addParty(p);
+		if (body.getParties() != null) {
+			for (int idx : body.getParties()) {
+				if (set.contains(idx) == false) {
+					set.add(idx);
+					Party p = this.partyDao.getParty(idx);
+					i.addParty(p);
+				}
 			}
 		}
 

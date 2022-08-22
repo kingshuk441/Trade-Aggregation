@@ -15,4 +15,8 @@ public interface PartyService {
 	public CustomResponse<Party> addParty(PartyBody p);
 
 	public CustomResponse<Party> getPartyByName(String name);
+
+	public CustomResponse<Party> updateParty(int id, PartyBody party);
+
+	public CustomResponse<Party> deleteParty(int id);
 }

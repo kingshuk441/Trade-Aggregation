@@ -1,9 +1,11 @@
 package com.osttra.capstone.tradeaggregation.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,5 +50,17 @@ public class PartyController {
 	@GetMapping("/party/name/{name}")
 	public CustomResponse<Party> show4(@PathVariable String name) {
 		return this.partyService.getPartyByName(name);
+	}
+
+	// update a party
+	@PutMapping("/party/{id}")
+	public CustomResponse<Party> show5(@PathVariable int id, @RequestBody PartyBody party) {
+		return this.partyService.updateParty(id, party);
+	}
+
+	// delete party
+	@DeleteMapping("/party/{id}")
+	public CustomResponse<Party> show6(@PathVariable int id) {
+		return this.partyService.deleteParty(id);
 	}
 }

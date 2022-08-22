@@ -21,6 +21,9 @@ public class Party {
 	@Column(name = "party_name")
 	private String partyName;
 
+	@Column(name = "party_full_name")
+	private String partyFullName;
+
 	@OneToOne
 	@JoinColumn(name = "i_id")
 	@JsonBackReference
@@ -30,9 +33,10 @@ public class Party {
 
 	}
 
-	public Party(String partyName) {
+	public Party(String partyName, String partyFullName) {
 		super();
 		this.partyName = partyName;
+		this.partyFullName = partyFullName;
 	}
 
 	public int getPartyId() {
@@ -59,9 +63,19 @@ public class Party {
 		this.institution = institution;
 	}
 
+	public String getPartyFullName() {
+		return partyFullName;
+	}
+
+	public void setPartyFullName(String partyFullName) {
+		this.partyFullName = partyFullName;
+	}
+
 	@Override
 	public String toString() {
-		return "Party [partyId=" + partyId + ", partyName=" + partyName + "]";
+		return "Party [partyId=" + partyId + ", partyName=" + partyName + ", institutionName="
+				+ institution.getInstitutionName() + ", institutionId=" + institution.getInstitutionId()
+				+ ", partyFullName=" + partyFullName + "]";
 	}
 
 }

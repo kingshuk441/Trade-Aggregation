@@ -13,4 +13,6 @@ public interface PartyDao {
 
 	public Party getPartyByName(String name);
 
+	public void deleteParty(int id);
+
 }

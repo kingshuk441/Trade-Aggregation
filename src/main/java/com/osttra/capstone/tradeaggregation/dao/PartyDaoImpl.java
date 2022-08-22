@@ -53,4 +53,12 @@ public class PartyDaoImpl implements PartyDao {
 		return null;
 	}
 
+	@Override
+	public void deleteParty(int id) {
+		Session session = entityManager.unwrap(Session.class);
+		Query theQuery = session.createQuery("delete from Party where partyId=:id");
+		theQuery.setParameter("id", id);
+		theQuery.executeUpdate();
+	}
+
 }
