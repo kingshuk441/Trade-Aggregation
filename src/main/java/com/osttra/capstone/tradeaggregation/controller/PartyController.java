@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.osttra.capstone.tradeaggregation.entity.CustomResponse;
 import com.osttra.capstone.tradeaggregation.entity.Institution;
 import com.osttra.capstone.tradeaggregation.entity.Party;
-import com.osttra.capstone.tradeaggregation.entity.PartyBody;
+import com.osttra.capstone.tradeaggregation.responsebody.PartyBody;
 import com.osttra.capstone.tradeaggregation.service.PartyService;
 
 @RestController

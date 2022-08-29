@@ -1,4 +1,4 @@
-package com.osttra.capstone.tradeaggregation.controller;
+package com.osttra.capstone.tradeaggregation.customexception;
 
 public class FoundException extends RuntimeException {
 	public FoundException(String message, Throwable cause) {

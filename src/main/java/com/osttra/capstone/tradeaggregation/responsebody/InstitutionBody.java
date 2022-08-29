@@ -1,4 +1,4 @@
-package com.osttra.capstone.tradeaggregation.entity;
+package com.osttra.capstone.tradeaggregation.responsebody;
 
 import java.util.Arrays;
 

@@ -7,14 +7,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.osttra.capstone.tradeaggregation.controller.FoundException;
-import com.osttra.capstone.tradeaggregation.controller.NotFoundException;
+import com.osttra.capstone.tradeaggregation.customexception.FoundException;
+import com.osttra.capstone.tradeaggregation.customexception.NotFoundException;
 import com.osttra.capstone.tradeaggregation.dao.InstitutionDao;
 import com.osttra.capstone.tradeaggregation.dao.PartyDao;
 import com.osttra.capstone.tradeaggregation.entity.CustomResponse;
 import com.osttra.capstone.tradeaggregation.entity.Institution;
 import com.osttra.capstone.tradeaggregation.entity.Party;
-import com.osttra.capstone.tradeaggregation.entity.PartyBody;
+import com.osttra.capstone.tradeaggregation.responsebody.PartyBody;
 
 @Service
 public class PartyServiceImpl implements PartyService {

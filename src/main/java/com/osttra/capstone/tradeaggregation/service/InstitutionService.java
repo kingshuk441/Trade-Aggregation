@@ -2,8 +2,8 @@ package com.osttra.capstone.tradeaggregation.service;
 
 import com.osttra.capstone.tradeaggregation.entity.CustomResponse;
 import com.osttra.capstone.tradeaggregation.entity.Institution;
-import com.osttra.capstone.tradeaggregation.entity.InstitutionBody;
 import com.osttra.capstone.tradeaggregation.entity.Party;
+import com.osttra.capstone.tradeaggregation.responsebody.InstitutionBody;
 
 public interface InstitutionService {
 	public CustomResponse<Institution> getInstitutions();

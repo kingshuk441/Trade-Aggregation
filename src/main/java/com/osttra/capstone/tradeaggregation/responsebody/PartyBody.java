@@ -1,4 +1,4 @@
-package com.osttra.capstone.tradeaggregation.entity;
+package com.osttra.capstone.tradeaggregation.responsebody;
 
 public class PartyBody {
 	private int id;
