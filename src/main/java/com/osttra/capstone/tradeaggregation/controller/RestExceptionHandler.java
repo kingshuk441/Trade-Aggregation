@@ -33,6 +33,7 @@ public class RestExceptionHandler {
 		c.setStatus(HttpStatus.BAD_REQUEST.value());
 		c.setTimestamp(System.currentTimeMillis());
 		c.setMsg("validation failed, Trade rejected!");
+
 		return new ResponseEntity<>(c, HttpStatus.BAD_REQUEST);
 
 	}
