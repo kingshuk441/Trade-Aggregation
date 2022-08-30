@@ -13,4 +13,10 @@ public interface TradeDao {
 
 	public Trade getTrade(int id);
 
+	public Trade updateTrade(Trade newTrade);
+
+	public List<Trade> getTradesByPartyName(String partyName);
+
+	public List<Trade> getTradesByInstitutionId(int id);
+
 }

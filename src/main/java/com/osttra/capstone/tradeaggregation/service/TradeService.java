@@ -16,4 +16,8 @@ public interface TradeService {
 	public CustomResponse<CancelTrade> getCancelTrades(int id);
 
 	public CustomResponse<Trade> updateTrade(int id, TradeUpdateBody body);
+
+	public CustomResponse<Trade> findByPartyName(String partyName);
+
+	public CustomResponse<Trade> findByInstitutionName(String institutionName);
 }

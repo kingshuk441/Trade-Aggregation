@@ -53,30 +53,69 @@ public class TradeBuilder {
 
 	}
 
+//	public TradeBuilder(Trade t, TradeUpdateBody body, PartyDao partyDao) {
+//		// tradeId,creTimeStamp,status,confirmTS
+//		t.setTradeRefNum(body.getTradeRefNum() == null ? t.getTradeRefNum() : body.getTradeRefNum());
+//		if (body.getPartyName() != null) {
+//			t.setPartyName(body.getPartyName());
+//			Party p = partyDao.getPartyByName(body.getPartyName());
+//			t.setPartyFullName(p.getPartyFullName());
+//			t.setInstitutionId(p.getInstitution().getInstitutionId());
+//		}
+//		if (body.getCounterPartyName() != null) {
+//			t.setCounterPartyName(body.getCounterPartyName());
+//			Party p = partyDao.getPartyByName(body.getCounterPartyName());
+//			t.setCounterPartyFullName(p.getPartyFullName());
+//		}
+//		t.setTradeDate(body.getTradeDate() == null ? t.getTradeDate() : body.getTradeDate());
+//		t.setEffectiveDate(body.getEffectiveDate() == null ? t.getEffectiveDate() : body.getEffectiveDate());
+//		t.setInstrumentId(body.getInstrumentId() == null ? t.getInstrumentId() : body.getInstrumentId());
+//		t.setNotionalAmount(body.getNotionalAmount() == 0 ? t.getNotionalAmount() : body.getNotionalAmount());
+//		t.setMaturityDate(body.getMaturityDate() == null ? t.getMaturityDate() : body.getMaturityDate());
+//		t.setCurrency(body.getCurrency() == null ? t.getCurrency() : body.getBuyer());
+//		t.setSeller(body.getSeller() == null ? t.getSeller() : body.getSeller());
+//		t.setBuyer(body.getBuyer() == null ? t.getBuyer() : body.getBuyer());
+//		t.setVersionTimeStamp(new Date());
+//		t.setVersion(t.getVersion() + 1);
+//	}
+
 	public TradeBuilder(Trade t, TradeUpdateBody body, PartyDao partyDao) {
+		this.tradeSetter = new TradeConstruct();
 		// tradeId,creTimeStamp,status,confirmTS
-		t.setTradeRefNum(body.getTradeRefNum() == null ? t.getTradeRefNum() : body.getTradeRefNum());
+		this.tradeRefNum = body.getTradeRefNum() == null ? t.getTradeRefNum() : body.getTradeRefNum();
 		if (body.getPartyName() != null) {
-			t.setPartyName(body.getPartyName());
+			this.partyName = body.getPartyName();
 			Party p = partyDao.getPartyByName(body.getPartyName());
-			t.setPartyFullName(p.getPartyFullName());
-			t.setInstitutionId(p.getInstitution().getInstitutionId());
+			this.partyFullName = p.getPartyFullName();
+			this.institutionId = p.getInstitution().getInstitutionId();
+		} else {
+			this.partyName = t.getPartyName();
+			this.partyFullName = t.getPartyFullName();
+			this.institutionId = t.getInstitutionId();
 		}
 		if (body.getCounterPartyName() != null) {
-			t.setCounterPartyName(body.getCounterPartyName());
+			this.counterPartyName = body.getCounterPartyName();
 			Party p = partyDao.getPartyByName(body.getCounterPartyName());
-			t.setCounterPartyFullName(p.getPartyFullName());
+			this.counterPartyFullName = p.getPartyFullName();
+		} else {
+			this.counterPartyName = t.getCounterPartyName();
+			this.counterPartyFullName = t.getCounterPartyFullName();
 		}
-		t.setTradeDate(body.getTradeDate() == null ? t.getTradeDate() : body.getTradeDate());
-		t.setEffectiveDate(body.getEffectiveDate() == null ? t.getEffectiveDate() : body.getEffectiveDate());
-		t.setInstrumentId(body.getInstrumentId() == null ? t.getInstrumentId() : body.getInstrumentId());
-		t.setNotionalAmount(body.getNotionalAmount() == 0 ? t.getNotionalAmount() : body.getNotionalAmount());
-		t.setMaturityDate(body.getMaturityDate() == null ? t.getMaturityDate() : body.getMaturityDate());
-		t.setCurrency(body.getCurrency() == null ? t.getCurrency() : body.getBuyer());
-		t.setSeller(body.getSeller() == null ? t.getSeller() : body.getSeller());
-		t.setBuyer(body.getBuyer() == null ? t.getBuyer() : body.getBuyer());
-		t.setVersionTimeStamp(new Date());
-		t.setVersion(t.getVersion() + 1);
+		this.tradeDate = body.getTradeDate() == null ? t.getTradeDate() : body.getTradeDate();
+		this.effectiveDate = body.getEffectiveDate() == null ? t.getEffectiveDate() : body.getEffectiveDate();
+		this.instrumentId = body.getInstrumentId() == null ? t.getInstrumentId() : body.getInstrumentId();
+		this.notionalAmount = body.getNotionalAmount() == 0 ? t.getNotionalAmount() : body.getNotionalAmount();
+		this.maturityDate = body.getMaturityDate() == null ? t.getMaturityDate() : body.getMaturityDate();
+		this.currency = body.getCurrency() == null ? t.getCurrency() : body.getBuyer();
+		this.seller = body.getSeller() == null ? t.getSeller() : body.getSeller();
+		this.buyer = body.getBuyer() == null ? t.getBuyer() : body.getBuyer();
+		this.versionTimeStamp = new Date();
+		this.version = t.getVersion() + 1;
+		this.tradeSetter.setAggregatedFrom(t.getAggregatedFrom());
+		this.creationTimeStamp = t.getCreationTimeStamp();
+		this.status = t.getStatus();
+		this.confirmationTimeStamp = t.getConfirmationTimeStamp();
+		this.fillValues();
 	}
 
 	public void constructNewTrade(String partyFullName, String counterPartyFullName, int institutionId,

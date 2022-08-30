@@ -13,6 +13,11 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModel;
+
+@ApiModel
+@Api(value = "Cancel Trade")
 @Entity
 @Table(name = "cancel_trade")
 public class CancelTrade {

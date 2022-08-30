@@ -12,27 +12,47 @@ import com.osttra.capstone.tradeaggregation.entity.CustomResponse;
 import com.osttra.capstone.tradeaggregation.entity.Trade;
 import com.osttra.capstone.tradeaggregation.service.CancelTradeService;
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
 @RestController
 @RequestMapping("/api")
 public class CancelTradeController {
 	@Autowired
 	private CancelTradeService cancelTradeService;
 
+	@ApiOperation(value = "View a list of available Users")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
 	@PostMapping("/cancel")
 	public CustomResponse<CancelTrade> show(CancelTrade c) {
 		return this.cancelTradeService.addCancelTrade(c);
 	}
 
+	@ApiOperation(value = "View a list of available Users")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
 	@GetMapping("/cancels")
 	public CustomResponse<CancelTrade> show2() {
 		return this.cancelTradeService.getCancelTrades();
 	}
 
+	@ApiOperation(value = "View a list of available Users")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
 	@GetMapping("/cancel/{id}")
 	public CustomResponse<CancelTrade> show3(@PathVariable int id) {
 		return this.cancelTradeService.getCancelTrade(id);
 	}
 
+	@ApiOperation(value = "View a list of available Users")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
 	@GetMapping("/cancel/{id}/aggr")
 	public CustomResponse<Trade> show4(@PathVariable int id) {
 		return this.cancelTradeService.getAggregatedTrade(id);

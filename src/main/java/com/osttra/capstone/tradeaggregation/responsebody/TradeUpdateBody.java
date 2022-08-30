@@ -4,16 +4,19 @@ import java.time.LocalDate;
 import java.util.Date;
 
 import com.osttra.capstone.tradeaggregation.validation.PartyName;
+import com.osttra.capstone.tradeaggregation.validation.PartySame;
 
 public class TradeUpdateBody {
 	// not used
 //	private int tradeId;
 	private String tradeRefNum;
 	@PartyName
+	@PartySame
 	private String partyName;
 	// not used
 //	private String partyFullName;
 	@PartyName
+	@PartySame
 	private String counterPartyName;
 	// not used
 //	private String counterPartyFullName;

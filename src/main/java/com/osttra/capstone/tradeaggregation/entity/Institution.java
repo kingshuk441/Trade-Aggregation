@@ -16,6 +16,11 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModel;
+
+@ApiModel
+@Api(value = "Institution")
 @Entity
 @Table(name = "institution")
 public class Institution {

@@ -13,10 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.osttra.capstone.tradeaggregation.customexception.NotFoundException;
 import com.osttra.capstone.tradeaggregation.dao.CancelTradeDao;
+import com.osttra.capstone.tradeaggregation.dao.InstitutionDao;
 import com.osttra.capstone.tradeaggregation.dao.PartyDao;
 import com.osttra.capstone.tradeaggregation.dao.TradeDao;
 import com.osttra.capstone.tradeaggregation.entity.CancelTrade;
 import com.osttra.capstone.tradeaggregation.entity.CustomResponse;
+import com.osttra.capstone.tradeaggregation.entity.Institution;
 import com.osttra.capstone.tradeaggregation.entity.Party;
 import com.osttra.capstone.tradeaggregation.entity.Trade;
 import com.osttra.capstone.tradeaggregation.objbuilder.TradeBuilder;
@@ -31,6 +33,8 @@ public class TradeServiceImpl implements TradeService {
 	private PartyDao partyDao;
 	@Autowired
 	private CancelTradeDao cancelDao;
+	@Autowired
+	private InstitutionDao institutionDao;
 
 	private HashMap<Integer, Trade> tradeCache;
 	private HashSet<String> cancelTrns;
@@ -178,8 +182,25 @@ public class TradeServiceImpl implements TradeService {
 			throw new NotFoundException("trade with id " + id + " not found!");
 		}
 		TradeBuilder tb = new TradeBuilder(t, body, partyDao);
-		t = this.tradeDao.saveTrade(t);
-		return new CustomResponse<>("trade updated successfully!", HttpStatus.ACCEPTED.value(), t);
+		Trade newTrade = tb.getTrade();
+		newTrade.setTradeId(t.getTradeId());
+		newTrade = this.tradeDao.updateTrade(newTrade);
+		return new CustomResponse<>("trade updated successfully!", HttpStatus.ACCEPTED.value(), newTrade);
+	}
+
+	@Override
+	public CustomResponse<Trade> findByPartyName(String partyName) {
+		List<Trade> allTrades = this.tradeDao.getTradesByPartyName(partyName);
+		return new CustomResponse<>("all trades fetched successfully!", HttpStatus.ACCEPTED.value(), allTrades);
+
+	}
+
+	@Override
+	public CustomResponse<Trade> findByInstitutionName(String institutionName) {
+		Institution i = this.institutionDao.getInstitutionByName(institutionName);
+		int id = i.getInstitutionId();
+		List<Trade> allTrades = this.tradeDao.getTradesByInstitutionId(id);
+		return new CustomResponse<>("all trades fetched successfully!", HttpStatus.ACCEPTED.value(), allTrades);
 	}
 
 }

@@ -11,6 +11,11 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModel;
+
+@ApiModel
+@Api(value = "Party")
 @Entity
 @Table(name = "party")
 public class Party {

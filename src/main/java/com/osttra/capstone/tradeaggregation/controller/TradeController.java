@@ -20,6 +20,10 @@ import com.osttra.capstone.tradeaggregation.responsebody.TradeBody;
 import com.osttra.capstone.tradeaggregation.responsebody.TradeUpdateBody;
 import com.osttra.capstone.tradeaggregation.service.TradeService;
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
 @RestController
 @RequestMapping("/api")
 @Validated
@@ -27,35 +31,69 @@ public class TradeController {
 	@Autowired
 	private TradeService tradeService;
 
-	// add trade
+	@ApiOperation(value = "add new trade")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
 	@PostMapping("/trade")
 	public CustomResponse<Trade> show(@Valid @RequestBody TradeBody body, BindingResult br) {
 		return this.tradeService.addTrade(body);
 	}
 
-	// get all trades
+	@ApiOperation(value = "get all trades")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
 	@GetMapping("/trades")
 	public CustomResponse<Trade> show2() {
 		return this.tradeService.getTrades();
 	}
 
-	// get trade by id
+	@ApiOperation(value = "get trade by id")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
 	@GetMapping("/trade/{id}")
 	public CustomResponse<Trade> show3(@PathVariable int id) {
 		return this.tradeService.getTrade(id);
 	}
 
-	// get cancel trade by id
+	@ApiOperation(value = " get cancel trades of aggregated trade by id")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
 	@GetMapping("/trade/{id}/cancel")
 	public CustomResponse<CancelTrade> show4(@PathVariable int id) {
 		return this.tradeService.getCancelTrades(id);
 	}
 
-	// update trade by id
+	@ApiOperation(value = "update trade by id")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
 	@PutMapping("/trade/{id}")
 	public CustomResponse<Trade> show5(@PathVariable int id, @Valid @RequestBody TradeUpdateBody body,
 			BindingResult br) {
-		System.out.println(body);
 		return this.tradeService.updateTrade(id, body);
+	}
+
+	@ApiOperation(value = "find trades by party name")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
+
+	@GetMapping("/trade/party/{partyName}")
+	public CustomResponse<Trade> show6(@PathVariable String partyName) {
+		return this.tradeService.findByPartyName(partyName);
+	}
+
+	@ApiOperation(value = "find trades by institution name")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
+
+	@GetMapping("/trade/institution/{institutionName}")
+	public CustomResponse<Trade> show7(@PathVariable String institutionName) {
+		return this.tradeService.findByInstitutionName(institutionName);
 	}
 }

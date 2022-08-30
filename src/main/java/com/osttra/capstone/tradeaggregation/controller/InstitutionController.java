@@ -16,61 +16,93 @@ import com.osttra.capstone.tradeaggregation.entity.Party;
 import com.osttra.capstone.tradeaggregation.responsebody.InstitutionBody;
 import com.osttra.capstone.tradeaggregation.service.InstitutionService;
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
 @RestController
 @RequestMapping("/api")
 public class InstitutionController {
 	@Autowired
 	private InstitutionService institutionService;
 
-	// show all institutions
+	@ApiOperation(value = "show all institutions")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
 	@GetMapping("/institution")
 	public CustomResponse<Institution> show() {
 		return this.institutionService.getInstitutions();
 	}
 
-	// show institution by id
+	@ApiOperation(value = "show institution by id")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
 	@GetMapping("/institution/{id}")
 	public CustomResponse<Institution> show2(@PathVariable int id) {
 		return this.institutionService.getInstitution(id);
 	}
 
-	// show all parties
+	@ApiOperation(value = "show all parties of a institution")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
 	@GetMapping("/institution/{id}/parties")
 	public CustomResponse<Party> show3(@PathVariable int id) {
 		return this.institutionService.getParties(id);
 	}
 
-	// add a party
+	@ApiOperation(value = "add a party to a institution")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
+
 	@PostMapping("/institution/{id}/party/{partyId}")
 	public CustomResponse<Institution> show4(@PathVariable int id, @PathVariable int partyId) {
 		return this.institutionService.addParty(id, partyId);
 	}
 
-	// add institution
+	@ApiOperation(value = "add new institution")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
 	@PostMapping("/institution")
 	public CustomResponse<Institution> show5(@RequestBody InstitutionBody body) {
 		return this.institutionService.addInstitution(body);
 	}
 
-	// get institution by name
+	@ApiOperation(value = "get institution by name")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
 	@GetMapping("/institution/name/{name}")
 	public CustomResponse<Institution> show6(@PathVariable String name) {
 		return this.institutionService.getInstitutionByName(name);
 	}
 
-	// update institution
+	@ApiOperation(value = "update institution by id")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
 	@PutMapping("/institution/{id}")
 	public CustomResponse<Institution> show7(@PathVariable int id, @RequestBody InstitutionBody body) {
 		return this.institutionService.updateInstitution(id, body);
 	}
 
-	// delete institution
+	@ApiOperation(value = "delete institution by id")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
 	@DeleteMapping("/institution/{id}")
 	public CustomResponse<Institution> show8(@PathVariable int id) {
 		return this.institutionService.deleteInstitution(id);
 	}
 
-	// delete party of institution
+	@ApiOperation(value = "Remove a party from institution")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
 	@PutMapping("/institution/{id}/{partyId}")
 	public CustomResponse<Institution> show9(@PathVariable int id, @PathVariable int partyId) {
 		return this.institutionService.removeParty(id, partyId);

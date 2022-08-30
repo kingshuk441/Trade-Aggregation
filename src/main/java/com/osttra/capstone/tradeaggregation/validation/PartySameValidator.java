@@ -9,25 +9,25 @@ public class PartySameValidator implements ConstraintValidator<PartySame, String
 
 	@Override
 	public void initialize(PartySame partyName) {
-		def = null;
 	}
 
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext context) {
-		System.out.println("-------------------------");
-		System.out.println("VAL:" + value);
-		System.out.println("DEF:" + def);
+//		System.out.println("-------------------------");
+//		System.out.println("VAL:" + value);
+//		System.out.println("DEF:" + def);
 		if (value == null)
 			return true;
-		if (def != null)
-			System.out.println("COM:" + def.equals(value));
+//		if (def != null)
+//			System.out.println("COM:" + def.equals(value));
 
 		if (def == null) {
 			def = value;
-			System.out.println("FIRST:" + value);
+//			System.out.println("FIRST:" + value);
 			return true;
 		} else if (def.equals(value)) {
-			System.out.println("SEC:" + value);
+			def = null;
+//			System.out.println("SEC:" + value);
 			return false;
 		}
 		def = null;

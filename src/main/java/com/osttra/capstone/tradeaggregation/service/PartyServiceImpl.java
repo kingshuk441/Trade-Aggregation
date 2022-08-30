@@ -100,7 +100,7 @@ public class PartyServiceImpl implements PartyService {
 		String name = party.getPartyName();
 		int institutionId = party.getInstitution();
 
-		if (institutionId != 0) {
+		if (institutionId != 0 && p.getInstitution() != null) {
 			Institution i = this.institutionDao.getInstitution(institutionId);
 			if (i == null) {
 				throw new NotFoundException("Institution with id " + id + " not found!");

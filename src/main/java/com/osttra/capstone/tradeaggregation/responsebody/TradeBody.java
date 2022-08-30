@@ -13,12 +13,12 @@ public class TradeBody {
 	@NotNull(message = "trade ref num is required")
 	private String tradeRefNum;
 	@PartyName(message = "party name (${validatedValue}) must be valid")
-	@PartySame(message = "party name and counter party name cant be same")
+	@PartySame(message = "party name (${validatedValue}) and counter party name cant be same")
 	@NotNull(message = "party name  is required")
 	@Size(max = 20, message = "party name length cant be more than 20")
 	private String partyName;
 	@PartyName(message = "counter party (${validatedValue}) name must be valid")
-	@PartySame(message = "party name and counter party name cant be same")
+	@PartySame(message = "party name and counter party name (${validatedValue}) cant be same")
 	@NotNull(message = "counter party name is required")
 	@Size(max = 20, message = "counter party name length cant be more than 20")
 	private String counterPartyName;
@@ -42,6 +42,9 @@ public class TradeBody {
 	@Size(max = 20, message = "buyer length cant be more than 20")
 	@NotNull(message = "buyer is required")
 	private String buyer;
+
+	public TradeBody() {
+	}
 
 	public TradeBody(@NotNull(message = "trade ref num is required") String tradeRefNum, String partyName,
 			String counterPartyName, @NotNull(message = "trade date is required") LocalDate tradeDate,

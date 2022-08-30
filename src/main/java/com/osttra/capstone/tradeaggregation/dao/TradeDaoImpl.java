@@ -48,4 +48,28 @@ public class TradeDaoImpl implements TradeDao {
 		return session.get(Trade.class, id);
 	}
 
+	@Override
+	public Trade updateTrade(Trade newTrade) {
+		Session session = entityManager.unwrap(Session.class);
+		return (Trade) session.merge(newTrade);
+	}
+
+	@Override
+	public List<Trade> getTradesByPartyName(String partyName) {
+		Session session = entityManager.unwrap(Session.class);
+		Query<Trade> query = session.createQuery("from Trade where partyName=:id", Trade.class);
+		query.setParameter("id", partyName);
+		List<Trade> allTrades = query.getResultList();
+		return allTrades;
+	}
+
+	@Override
+	public List<Trade> getTradesByInstitutionId(int id) {
+		Session session = entityManager.unwrap(Session.class);
+		Query<Trade> query = session.createQuery("from Trade where institutionId=:id", Trade.class);
+		query.setParameter("id", id);
+		List<Trade> allTrades = query.getResultList();
+		return allTrades;
+	}
+
 }
