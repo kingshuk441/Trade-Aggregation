@@ -3,6 +3,7 @@ package com.osttra.capstone.tradeaggregation.responsebody;
 import java.time.LocalDate;
 
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -11,16 +12,19 @@ import com.osttra.capstone.tradeaggregation.validation.PartySame;
 
 public class TradeBody {
 	@NotNull(message = "trade ref num is required")
+	@NotBlank(message = "cant be blank")
 	private String tradeRefNum;
 	@PartyName(message = "party name (${validatedValue}) must be valid")
 	@PartySame(message = "party name (${validatedValue}) and counter party name cant be same")
 	@NotNull(message = "party name  is required")
 	@Size(max = 20, message = "party name length cant be more than 20")
+	@NotBlank(message = "cant be blank")
 	private String partyName;
 	@PartyName(message = "counter party (${validatedValue}) name must be valid")
 	@PartySame(message = "party name and counter party name (${validatedValue}) cant be same")
 	@NotNull(message = "counter party name is required")
 	@Size(max = 20, message = "counter party name length cant be more than 20")
+	@NotBlank(message = "cant be blank")
 	private String counterPartyName;
 	@NotNull(message = "trade date is required")
 	private LocalDate tradeDate;
@@ -28,6 +32,7 @@ public class TradeBody {
 	private LocalDate effectiveDate;
 	@NotNull(message = "instrument id is required")
 	@Size(max = 40, message = "instrument id length cant be more than 40")
+	@NotBlank(message = "cant be blank")
 	private String instrumentId;
 	@Min(value = 1, message = "notional amount cant be 0")
 	private long notionalAmount;
@@ -35,26 +40,32 @@ public class TradeBody {
 	private LocalDate maturityDate;
 	@NotNull(message = "currency is required")
 	@Size(max = 3, message = "currency length cant be more than 3")
+	@NotBlank(message = "cant be blank")
 	private String currency;
 	@Size(max = 20, message = "seller length cant be more than 20")
+	@NotBlank(message = "cant be blank")
 	@NotNull(message = "seller is required")
 	private String seller;
 	@Size(max = 20, message = "buyer length cant be more than 20")
+	@NotBlank(message = "cant be blank")
 	@NotNull(message = "buyer is required")
 	private String buyer;
 
 	public TradeBody() {
 	}
 
-	public TradeBody(@NotNull(message = "trade ref num is required") String tradeRefNum, String partyName,
-			String counterPartyName, @NotNull(message = "trade date is required") LocalDate tradeDate,
+	public TradeBody(
+			@NotNull(message = "trade ref num is required") @NotBlank(message = "cant be blank") String tradeRefNum,
+			@NotNull(message = "party name  is required") @Size(max = 20, message = "party name length cant be more than 20") @NotBlank(message = "cant be blank") String partyName,
+			@NotNull(message = "counter party name is required") @Size(max = 20, message = "counter party name length cant be more than 20") @NotBlank(message = "cant be blank") String counterPartyName,
+			@NotNull(message = "trade date is required") LocalDate tradeDate,
 			@NotNull(message = "effective date is required") LocalDate effectiveDate,
-			@NotNull(message = "instrument id is required") @Size(max = 40, message = "instrument id length cant be more than 40") String instrumentId,
+			@NotNull(message = "instrument id is required") @Size(max = 40, message = "instrument id length cant be more than 40") @NotBlank(message = "cant be blank") String instrumentId,
 			@Min(value = 1, message = "notional amount cant be 0") long notionalAmount,
 			@NotNull(message = "maturity date is required") LocalDate maturityDate,
-			@NotNull(message = "currency is required") @Size(max = 3, message = "currency length cant be more than 3") String currency,
-			@Size(max = 20, message = "seller length cant be more than 20") @NotNull(message = "seller is required") String seller,
-			@Size(max = 20, message = "buyer length cant be more than 20") @NotNull(message = "buyer is required") String buyer) {
+			@NotNull(message = "currency is required") @Size(max = 3, message = "currency length cant be more than 3") @NotBlank(message = "cant be blank") String currency,
+			@Size(max = 20, message = "seller length cant be more than 20") @NotBlank(message = "cant be blank") @NotNull(message = "seller is required") String seller,
+			@Size(max = 20, message = "buyer length cant be more than 20") @NotBlank(message = "cant be blank") @NotNull(message = "buyer is required") String buyer) {
 		super();
 		this.tradeRefNum = tradeRefNum;
 		this.partyName = partyName;

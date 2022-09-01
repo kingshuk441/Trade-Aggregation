@@ -20,7 +20,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.osttra.capstone.tradeaggregation.responsebody.TradeBody;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModel;
@@ -90,32 +89,38 @@ public class Trade {
 	public Trade() {
 	}
 
-	public Trade(TradeBody t,
-			@Size(max = 200, message = "party full name length cant be more than 200") String partyFullName,
+	public Trade(String tradeRefNum, String partyName,
+			@Size(max = 200, message = "party full name length cant be more than 200") @NotNull(message = "party full name is required") String partyFullName,
+			@Size(max = 200, message = "party full name length cant be more than 200") String counterPartyName,
 			@Size(max = 200, message = "counter party full name length cant be more than 200") String counterPartyFullName,
+			LocalDate tradeDate, LocalDate effectiveDate, String instrumentId, long notionalAmount,
+			LocalDate maturityDate, String currency, String seller, String buyer,
 			@NotNull(message = "creation timestamp is required") Date creationTimeStamp,
 			@NotNull(message = "version timestamp is required") Date versionTimeStamp, Date confirmationTimeStamp,
 			int version,
 			@Size(max = 50, message = "status length cant be more than 50") @NotNull(message = "status is required") String status,
+			List<CancelTrade> aggregatedFrom,
 			@Min(value = 1, message = "institution id is required") int institutionId) {
-		this.tradeRefNum = t.getTradeRefNum();
-		this.partyName = t.getPartyName();
-		this.counterPartyName = t.getCounterPartyName();
+		super();
+		this.tradeRefNum = tradeRefNum;
+		this.partyName = partyName;
 		this.partyFullName = partyFullName;
+		this.counterPartyName = counterPartyName;
 		this.counterPartyFullName = counterPartyFullName;
-		this.tradeDate = t.getTradeDate();
-		this.effectiveDate = t.getEffectiveDate();
-		this.instrumentId = t.getInstrumentId();
-		this.notionalAmount = t.getNotionalAmount();
-		this.maturityDate = t.getMaturityDate();
-		this.currency = t.getCurrency();
-		this.seller = t.getCurrency();
-		this.buyer = t.getBuyer();
+		this.tradeDate = tradeDate;
+		this.effectiveDate = effectiveDate;
+		this.instrumentId = instrumentId;
+		this.notionalAmount = notionalAmount;
+		this.maturityDate = maturityDate;
+		this.currency = currency;
+		this.seller = seller;
+		this.buyer = buyer;
 		this.creationTimeStamp = creationTimeStamp;
 		this.versionTimeStamp = versionTimeStamp;
 		this.confirmationTimeStamp = confirmationTimeStamp;
 		this.version = version;
 		this.status = status;
+		this.aggregatedFrom = aggregatedFrom;
 		this.institutionId = institutionId;
 	}
 

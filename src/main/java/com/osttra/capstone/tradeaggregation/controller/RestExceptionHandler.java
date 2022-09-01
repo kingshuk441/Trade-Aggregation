@@ -38,22 +38,6 @@ public class RestExceptionHandler {
 
 	}
 
-//	@ExceptionHandler(MethodArgumentNotValidException.class)
-//	public ResponseEntity<CustomValidationErrorResponse> handleException(MethodArgumentNotValidException ex) {
-//		CustomValidationErrorResponse c = new CustomValidationErrorResponse();
-//		for (ObjectError e : ex.getBindingResult().getAllErrors()) {
-//			CustomError ce = new CustomError();
-//			ce.setFieldName(e.getCode());
-//			ce.setViolationName("sd");
-//			ce.setMsg(e.getDefaultMessage());
-//			c.getErrorFields().add(ce);
-//
-//		}
-//		System.out.println("END!!!!!!!!!!");
-//
-//		return new ResponseEntity<>(c, HttpStatus.BAD_REQUEST);
-//	}
-
 	@ExceptionHandler
 	public ResponseEntity<CustomErrorResponse> handleException(NotFoundException ex) {
 		CustomErrorResponse c = new CustomErrorResponse();

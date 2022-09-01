@@ -23,9 +23,7 @@ public class PartyNameValidator implements ConstraintValidator<PartyName, String
 	public boolean isValid(String value, ConstraintValidatorContext context) {
 		if (value == null)
 			return true;
-//		System.out.println(value);
 		Party p = this.partyDao.getPartyByName(value);
-		// System.out.println(p);
 		if (p != null && p.getInstitution() != null)
 			return true;
 		return false;

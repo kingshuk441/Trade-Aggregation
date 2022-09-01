@@ -92,6 +92,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 		return new CustomResponse<>("institution added successfully!", HttpStatus.ACCEPTED.value(), i);
 	}
 
+	@Transactional
 	private void getInstituteNameHelper(String s) {
 		try {
 			CustomResponse<Institution> res = this.getInstitutionByName(s);

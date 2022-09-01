@@ -26,71 +26,65 @@ public class PartyController {
 	@Autowired
 	private PartyService partyService;
 
-	@ApiOperation(value = "View a list of available Users")
+	@ApiOperation(value = "show all parties")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
 			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
 			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
-	// show all parties
 	@GetMapping("/parties")
 	public CustomResponse<Party> show() {
 		return this.partyService.getParties();
 	}
 
-	@ApiOperation(value = "View a list of available Users")
+	@ApiOperation(value = "show party by id")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
 			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
 			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
-	// show party by id
 	@GetMapping("/party/{id}")
 	public CustomResponse<Party> show2(@PathVariable int id) {
 		return this.partyService.getParty(id);
 	}
 
-	@ApiOperation(value = "View a list of available Users")
+	@ApiOperation(value = "show Institution of party by id")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
 			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
 			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
-	// show Institution
+
 	@GetMapping("/party/{id}/institution")
 	public CustomResponse<Institution> show3(@PathVariable int id) {
 		return this.partyService.getInstitution(id);
 	}
 
-	@ApiOperation(value = "View a list of available Users")
+	@ApiOperation(value = " add new party")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
 			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
 			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
-	// add a party
 	@PostMapping("/party")
 	public CustomResponse<Party> show4(@RequestBody PartyBody party) {
 		return this.partyService.addParty(party);
 	}
 
-	@ApiOperation(value = "View a list of available Users")
+	@ApiOperation(value = "get party by name")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
 			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
 			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
-	// get party by name
 	@GetMapping("/party/name/{name}")
 	public CustomResponse<Party> show4(@PathVariable String name) {
 		return this.partyService.getPartyByName(name);
 	}
 
-	@ApiOperation(value = "View a list of available Users")
+	@ApiOperation(value = "update a party by id")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
 			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
 			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
-	// update a party
 	@PutMapping("/party/{id}")
 	public CustomResponse<Party> show5(@PathVariable int id, @RequestBody PartyBody party) {
 		return this.partyService.updateParty(id, party);
 	}
 
-	@ApiOperation(value = "View a list of available Users")
+	@ApiOperation(value = "delete party by id")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
 			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
 			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
-	// delete party
 	@DeleteMapping("/party/{id}")
 	public CustomResponse<Party> show6(@PathVariable int id) {
 		return this.partyService.deleteParty(id);

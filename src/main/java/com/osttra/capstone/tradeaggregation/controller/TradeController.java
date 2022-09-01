@@ -5,6 +5,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,7 +32,7 @@ public class TradeController {
 	@Autowired
 	private TradeService tradeService;
 
-	@ApiOperation(value = "add new trade")
+	@ApiOperation(value = "add new trade (API - 1)")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
 			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
 			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
@@ -58,7 +59,7 @@ public class TradeController {
 		return this.tradeService.getTrade(id);
 	}
 
-	@ApiOperation(value = " get cancel trades of aggregated trade by id")
+	@ApiOperation(value = " get cancel trades of aggregated trade by id (API - 3)")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
 			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
 			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
@@ -96,4 +97,32 @@ public class TradeController {
 	public CustomResponse<Trade> show7(@PathVariable String institutionName) {
 		return this.tradeService.findByInstitutionName(institutionName);
 	}
+
+	@ApiOperation(value = "Search trade by trn and party Name (API2 - I)")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
+	@GetMapping("/trade/search/1/{trn}/{partyName}")
+	public CustomResponse<Trade> show8(@PathVariable String trn, @PathVariable String partyName) {
+		return this.tradeService.findByTrnParty(trn, partyName);
+	}
+
+	@ApiOperation(value = "Search all trades by status and party Name (API2 - II)")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
+	@GetMapping("/trade/search/2/{partyName}/{status}")
+	public CustomResponse<Trade> show9(@PathVariable String partyName, @PathVariable String status) {
+		return this.tradeService.findByPartyStatus(partyName, status);
+	}
+
+	@ApiOperation(value = "delete trade by id")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
+	@DeleteMapping("/trade/{id}")
+	public CustomResponse<Trade> show10(@PathVariable int id) {
+		return this.tradeService.deleteTrade(id);
+	}
+
 }

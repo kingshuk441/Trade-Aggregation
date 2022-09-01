@@ -3,7 +3,6 @@ package com.osttra.capstone.tradeaggregation.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,16 +21,7 @@ public class CancelTradeController {
 	@Autowired
 	private CancelTradeService cancelTradeService;
 
-	@ApiOperation(value = "View a list of available Users")
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
-			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
-			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
-	@PostMapping("/cancel")
-	public CustomResponse<CancelTrade> show(CancelTrade c) {
-		return this.cancelTradeService.addCancelTrade(c);
-	}
-
-	@ApiOperation(value = "View a list of available Users")
+	@ApiOperation(value = "get all cancel trades")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
 			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
 			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
@@ -40,7 +30,7 @@ public class CancelTradeController {
 		return this.cancelTradeService.getCancelTrades();
 	}
 
-	@ApiOperation(value = "View a list of available Users")
+	@ApiOperation(value = "get cancel trade by id")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
 			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
 			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
@@ -49,7 +39,7 @@ public class CancelTradeController {
 		return this.cancelTradeService.getCancelTrade(id);
 	}
 
-	@ApiOperation(value = "View a list of available Users")
+	@ApiOperation(value = "get aggregated trade of cancel trade")
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
 			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
 			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })

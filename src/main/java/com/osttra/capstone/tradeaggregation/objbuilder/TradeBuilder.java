@@ -53,6 +53,22 @@ public class TradeBuilder {
 
 	}
 
+	public TradeBuilder(Trade body) {
+		this.tradeSetter = new TradeConstruct();
+		this.tradeRefNum = body.getTradeRefNum();
+		this.partyName = body.getPartyName();
+		this.counterPartyName = body.getCounterPartyName();
+		this.tradeDate = body.getTradeDate();
+		this.effectiveDate = body.getEffectiveDate();
+		this.instrumentId = body.getInstrumentId();
+		this.maturityDate = body.getMaturityDate();
+		this.currency = body.getCurrency();
+		this.seller = body.getSeller();
+		this.buyer = body.getBuyer();
+		this.notionalAmount = body.getNotionalAmount();
+
+	}
+
 //	public TradeBuilder(Trade t, TradeUpdateBody body, PartyDao partyDao) {
 //		// tradeId,creTimeStamp,status,confirmTS
 //		t.setTradeRefNum(body.getTradeRefNum() == null ? t.getTradeRefNum() : body.getTradeRefNum());
@@ -96,6 +112,7 @@ public class TradeBuilder {
 		if (body.getCounterPartyName() != null) {
 			this.counterPartyName = body.getCounterPartyName();
 			Party p = partyDao.getPartyByName(body.getCounterPartyName());
+			// TODO party and counter party cant be same
 			this.counterPartyFullName = p.getPartyFullName();
 		} else {
 			this.counterPartyName = t.getCounterPartyName();
@@ -106,7 +123,7 @@ public class TradeBuilder {
 		this.instrumentId = body.getInstrumentId() == null ? t.getInstrumentId() : body.getInstrumentId();
 		this.notionalAmount = body.getNotionalAmount() == 0 ? t.getNotionalAmount() : body.getNotionalAmount();
 		this.maturityDate = body.getMaturityDate() == null ? t.getMaturityDate() : body.getMaturityDate();
-		this.currency = body.getCurrency() == null ? t.getCurrency() : body.getBuyer();
+		this.currency = body.getCurrency() == null ? t.getCurrency() : body.getCurrency();
 		this.seller = body.getSeller() == null ? t.getSeller() : body.getSeller();
 		this.buyer = body.getBuyer() == null ? t.getBuyer() : body.getBuyer();
 		this.versionTimeStamp = new Date();

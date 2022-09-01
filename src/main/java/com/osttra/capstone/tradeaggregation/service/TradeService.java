@@ -20,4 +20,10 @@ public interface TradeService {
 	public CustomResponse<Trade> findByPartyName(String partyName);
 
 	public CustomResponse<Trade> findByInstitutionName(String institutionName);
+
+	public CustomResponse<Trade> findByTrnParty(String trn, String partyName);
+
+	CustomResponse<Trade> findByPartyStatus(String partyName, String status);
+
+	public CustomResponse<Trade> deleteTrade(int id);
 }
