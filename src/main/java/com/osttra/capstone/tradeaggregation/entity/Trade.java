@@ -77,7 +77,7 @@ public class Trade {
 	@NotNull(message = "status is required")
 	private String status;
 
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name = "a_id")
 	@JsonManagedReference
 	private List<CancelTrade> aggregatedFrom;

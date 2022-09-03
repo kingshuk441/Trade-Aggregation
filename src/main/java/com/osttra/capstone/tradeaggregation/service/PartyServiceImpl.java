@@ -1,6 +1,7 @@
 package com.osttra.capstone.tradeaggregation.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -67,11 +68,11 @@ public class PartyServiceImpl implements PartyService {
 		newParty.setPartyFullName(party.getPartyFullName());
 		int institutionId = party.getInstitution();
 		if (institutionId != 0) {
-			Institution institution = this.institutionRepository.findById(institutionId).get();
-			if (institution == null) {
+			Optional<Institution> institution = this.institutionRepository.findById(institutionId);
+			if (institution.isEmpty()) {
 				throw new NotFoundException("Institution with name " + partyName + " not found!");
 			}
-			newParty.setInstitution(institution);
+			newParty.setInstitution(institution.get());
 		}
 		newParty = this.partyRepository.save(newParty);
 		return new CustomResponse<>("Party Added successfully!", HttpStatus.ACCEPTED.value(), newParty);
@@ -89,36 +90,38 @@ public class PartyServiceImpl implements PartyService {
 
 	@Override
 	public CustomResponse<Party> updateParty(int partyId, PartyBody partyDetails) {
-		Party party = this.partyRepository.findById(partyId).get();
-		if (party == null) {
+		Optional<Party> party = this.partyRepository.findById(partyId);
+		if (party.isEmpty()) {
 			throw new NotFoundException("party with id " + partyId + " not found!");
 		}
 		String name = partyDetails.getPartyName();
 		int institutionId = partyDetails.getInstitution();
+		String partyFullName = partyDetails.getPartyFullName();
 
-		if (institutionId != 0 && party.getInstitution() == null) {
+		if (institutionId != 0 && party.get().getInstitution() == null) {
 			Institution i = this.institutionRepository.findById(institutionId).get();
 			if (i == null) {
 				throw new NotFoundException("Institution with id " + partyId + " not found!");
 			}
-			party.setInstitution(i);
+			party.get().setInstitution(i);
 		}
 		if (name != null) {
-			party.setPartyName(name);
+			party.get().setPartyName(name);
 		}
 		if (partyDetails.getPartyFullName() != null) {
+			party.get().setPartyFullName(partyFullName);
 		}
-		party = this.partyRepository.save(party);
-		return new CustomResponse<>("Party Updated successfully!", HttpStatus.ACCEPTED.value(), party);
+		Party updatedParty = this.partyRepository.save(party.get());
+		return new CustomResponse<>("Party Updated successfully!", HttpStatus.ACCEPTED.value(), updatedParty);
 	}
 
 	@Override
 	public CustomResponse<Party> deleteParty(int partyId) {
-		Party party = this.partyRepository.findById(partyId).get();
-		if (party == null) {
+		Optional<Party> party = this.partyRepository.findById(partyId);
+		if (party.isEmpty()) {
 			throw new NotFoundException("party with id " + partyId + " not found!");
 		}
 		this.partyRepository.deleteById(partyId);
-		return new CustomResponse<>("Party Deleted successfully!", HttpStatus.ACCEPTED.value(), party);
+		return new CustomResponse<>("Party Deleted successfully!", HttpStatus.ACCEPTED.value(), party.get());
 	}
 }

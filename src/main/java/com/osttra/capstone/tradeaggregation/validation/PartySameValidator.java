@@ -32,7 +32,11 @@ public class PartySameValidator implements ConstraintValidator<PartySame, String
 			return true;
 		}
 
-		String institution = p.getInstitution().getInstitutionName();
+		String institution = p.getInstitution() == null ? null : p.getInstitution().getInstitutionName();
+		if (institution == null) {
+			def = null;
+			return true;
+		}
 
 		if (def == null) {
 			def = institution;

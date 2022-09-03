@@ -1,6 +1,7 @@
 package com.osttra.capstone.tradeaggregation.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,11 +34,11 @@ public class CancelTradeServiceImpl implements CancelTradeService {
 
 	@Override
 	public CustomResponse<CancelTrade> getCancelTrade(int id) {
-		CancelTrade c = this.cancelRepository.findById(id).get();
-		if (c == null) {
+		Optional<CancelTrade> c = this.cancelRepository.findById(id);
+		if (c.isEmpty()) {
 			throw new NotFoundException("cancel trade with id " + id + " not found!");
 		}
-		return new CustomResponse<>("cancel trade fetched successfully!", HttpStatus.ACCEPTED.value(), c);
+		return new CustomResponse<>("cancel trade fetched successfully!", HttpStatus.ACCEPTED.value(), c.get());
 	}
 
 	@Override

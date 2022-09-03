@@ -3,6 +3,7 @@ package com.osttra.capstone.tradeaggregation.service;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,45 +34,48 @@ public class InstitutionServiceImpl implements InstitutionService {
 
 	@Override
 	public CustomResponse<Institution> getInstitution(int instiId) {
-		Institution institution = this.institutionRepository.findById(instiId).get();
-		if (institution == null) {
+		Optional<Institution> institution = this.institutionRepository.findById(instiId);
+		if (institution.isEmpty()) {
 			throw new NotFoundException("Institution with id " + instiId + " not found!");
 		}
 		return new CustomResponse<>("institution of id " + instiId + " fetched successfully!",
-				HttpStatus.ACCEPTED.value(), institution);
+				HttpStatus.ACCEPTED.value(), institution.get());
 	}
 
 	@Override
 	public CustomResponse<Party> getParties(int instiId) {
-		Institution institution = this.institutionRepository.findById(instiId).get();
-		if (institution == null) {
+		Optional<Institution> institution = this.institutionRepository.findById(instiId);
+		if (institution.isEmpty()) {
 			throw new NotFoundException("Institution with id " + instiId + " not found!");
 		}
-		List<Party> allParties = institution.getAllParties();
+		List<Party> allParties = institution.get().getAllParties();
 		return new CustomResponse<>("parties fetched successfully!", HttpStatus.ACCEPTED.value(), allParties);
 	}
 
 	public Institution addParty(int instiId, Party partyToAdd) {
 
-		Institution institution = this.institutionRepository.findById(instiId).get();
-		for (Party party : institution.getAllParties()) {
+		Optional<Institution> institution = this.institutionRepository.findById(instiId);
+		if(institution.isEmpty()){
+			throw new NotFoundException("Institution with id " + instiId + " not found!");
+		}
+		for (Party party : institution.get().getAllParties()) {
 			if (party.getPartyId() == partyToAdd.getPartyId()) {
 				return null;
 			}
 		}
 
-		institution.addParty(partyToAdd);
-		return institution;
+		institution.get().addParty(partyToAdd);
+		return institution.get();
 
 	}
 
 	@Override
 	public CustomResponse<Institution> addParty(int instiId, int partyId) {
-		Party party = this.partyRepository.findById(partyId).get();
-		if (party == null) {
+		Optional<Party> party = this.partyRepository.findById(partyId);
+		if (party.isEmpty()) {
 			throw new NotFoundException("party with id " + instiId + " not found!");
 		}
-		Institution institution = this.addParty(instiId, party);
+		Institution institution = this.addParty(instiId, party.get());
 		if (institution == null) {
 			throw new RuntimeException("already added!");
 		}
@@ -91,8 +95,9 @@ public class InstitutionServiceImpl implements InstitutionService {
 			for (int partyId : body.getParties()) {
 				if (set.contains(partyId) == false) {
 					set.add(partyId);
-					Party party = this.partyRepository.findById(partyId).get();
-					institution.addParty(party);
+					Optional<Party> party = this.partyRepository.findById(partyId);
+					if(party.isEmpty() == false)
+					institution.addParty(party.get());
 				}
 			}
 		}
@@ -123,40 +128,41 @@ public class InstitutionServiceImpl implements InstitutionService {
 
 	@Override
 	public CustomResponse<Institution> updateInstitution(int instiId, InstitutionBody body) {
-		Institution institution = this.institutionRepository.findById(instiId).get();
-		if (institution == null) {
+		Optional<Institution> institution = this.institutionRepository.findById(instiId);
+		if (institution.isEmpty()) {
 			throw new NotFoundException("Institution with id " + instiId + " not found!");
 		}
 		if (body.getInstitutionName() != null) {
-			institution.setInstitutionName(body.getInstitutionName());
+			institution.get().setInstitutionName(body.getInstitutionName());
 		}
 		if (body.getParties() != null) {
 			HashSet<Integer> alreadyPresent = new HashSet<>();
 			List<Party> addParties = new ArrayList<>();
 			for (int partyId : body.getParties()) {
-				Party party = this.partyRepository.findById(partyId).get();
-				addParties.add(party);
+				Optional<Party> party = this.partyRepository.findById(partyId);
+				if(party.isEmpty()==false)
+				addParties.add(party.get());
 				alreadyPresent.add(partyId);
 			}
-			for (Party party : institution.getAllParties()) {
+			for (Party party : institution.get().getAllParties()) {
 				if (alreadyPresent.contains(party.getPartyId()) == false) {
 					addParties.add(party);
 					alreadyPresent.add(party.getPartyId());
 				}
 			}
-			institution.setAllParties(addParties);
+			institution.get().setAllParties(addParties);
 		}
-		Institution updatedInstitution = this.institutionRepository.save(institution);
+		Institution updatedInstitution = this.institutionRepository.save(institution.get());
 		return new CustomResponse<>("Institute updated successfully!", HttpStatus.ACCEPTED.value(), updatedInstitution);
 	}
 
 	@Override
 	public CustomResponse<Institution> deleteInstitution(int instiId) {
-		Institution institution = this.institutionRepository.findById(instiId).get();
-		if (institution == null) {
+		Optional<Institution> institution = this.institutionRepository.findById(instiId);
+		if (institution.isEmpty()) {
 			throw new NotFoundException("Institution with id " + instiId + " not found!");
 		}
-		Institution institutionToDelete = new Institution(institution);
+		Institution institutionToDelete = new Institution(institution.get());
 		this.institutionRepository.deleteById(instiId);
 
 		return new CustomResponse<>("Institute deleted successfully!", HttpStatus.ACCEPTED.value(),
@@ -165,19 +171,19 @@ public class InstitutionServiceImpl implements InstitutionService {
 
 	@Override
 	public CustomResponse<Institution> removeParty(int instiId, int partyId) {
-		Institution institution = this.institutionRepository.findById(instiId).get();
-		if (institution == null) {
+		Optional<Institution> institution = this.institutionRepository.findById(instiId);
+		if (institution.isEmpty()) {
 			throw new NotFoundException("Institution with id " + instiId + " not found!");
 		}
-		List<Party> allParties = institution.getAllParties();
+		List<Party> allParties = institution.get().getAllParties();
 		for (int j = 0; j < allParties.size(); j++) {
 			Party party = allParties.get(j);
 			if (party.getPartyId() == partyId) {
 				Party partyAtLastIndex = allParties.get(allParties.size() - 1);
 				allParties.set(j, partyAtLastIndex);
 				allParties.remove(allParties.size() - 1);
-				institution = this.institutionRepository.save(institution);
-				return new CustomResponse<>("Party deleted successfully!", HttpStatus.ACCEPTED.value(), institution);
+				Institution updatedInstitution = this.institutionRepository.save(institution.get());
+				return new CustomResponse<>("Party deleted successfully!", HttpStatus.ACCEPTED.value(),updatedInstitution);
 			}
 		}
 		throw new NotFoundException("Party with id " + partyId + " not found!");

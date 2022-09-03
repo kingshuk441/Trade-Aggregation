@@ -5,10 +5,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import com.osttra.capstone.tradeaggregation.customexception.FoundException;
@@ -104,12 +104,12 @@ public class TradeServiceImpl implements TradeService {
 
 	@Override
 	public CustomResponse<CancelTrade> getCancelTrades(int id) {
-		Trade trade = this.tradeRepository.findById(id).get();
+		Optional<Trade> trade = this.tradeRepository.findById(id);
 		if (trade == null) {
 			throw new NotFoundException("trade with id " + id + " not found!");
 		}
 		return new CustomResponse<>("all cancel Trades fetched successfully!", HttpStatus.ACCEPTED.value(),
-				trade.getAggregatedFrom());
+				trade.get().getAggregatedFrom());
 	}
 
 	private Trade aggregationTrade(Trade incomingTrade, Trade matchedTrade) {
@@ -144,11 +144,16 @@ public class TradeServiceImpl implements TradeService {
 				newAggrList.add(c);
 			}
 		}
+		this.tradeRepository.save(newTrade);
 		newTrade.setAggregatedFrom(newAggrList);
+		this.tradeRepository.save(newTrade);
+
 		newTrade.addCancelTrades(c1);
 		newTrade.addCancelTrades(c2);
 		// save the new trade in trade table
+		// adding cancel trades in cancel table
 		this.tradeRepository.save(newTrade);
+
 		// remove the matched trade from trade table
 		this.tradeRepository.deleteById(matchedTrade.getTradeId());
 		// adding prev + new cancel trades in new trade
@@ -157,9 +162,6 @@ public class TradeServiceImpl implements TradeService {
 				c.setAggregatedTrade(newTrade);
 			}
 		}
-		// adding cancel trades in cancel table
-		this.cancelRepository.save(c1);
-		this.cancelRepository.save(c2);
 
 		// adding new trade in cache
 		this.tradeCache.put(newTrade.getTradeId(), newTrade);
@@ -187,14 +189,14 @@ public class TradeServiceImpl implements TradeService {
 
 	@Override
 	public CustomResponse<Trade> updateTrade(int id, TradeUpdateBody body) {
-		Trade t = this.tradeRepository.findById(id).get();
-		if (t == null) {
+		Optional<Trade> t = this.tradeRepository.findById(id);
+		if (t.isEmpty()) {
 			throw new NotFoundException("trade with id " + id + " not found!");
 		}
 
-		TradeBuilder tb = new TradeBuilder(t, body, partyRepository);
+		TradeBuilder tb = new TradeBuilder(t.get(), body, partyRepository);
 		Trade newTrade = tb.getTrade();
-		newTrade.setTradeId(t.getTradeId());
+		newTrade.setTradeId(t.get().getTradeId());
 		int iid = 0;
 		String partyName = body.getPartyName();
 
@@ -251,11 +253,11 @@ public class TradeServiceImpl implements TradeService {
 
 	@Override
 	public CustomResponse<Trade> getTrade(int tradeId) {
-		Trade trade = this.tradeRepository.findById(tradeId).get();
-		if (trade == null) {
+		Optional<Trade> trade = this.tradeRepository.findById(tradeId);
+		if (trade.isEmpty()) {
 			throw new NotFoundException("trade with id " + tradeId + " not found!");
 		}
-		return new CustomResponse<>("Trade fetched successfully!", HttpStatus.ACCEPTED.value(), trade);
+		return new CustomResponse<>("Trade fetched successfully!", HttpStatus.ACCEPTED.value(), trade.get());
 	}
 
 	@Override
@@ -266,14 +268,16 @@ public class TradeServiceImpl implements TradeService {
 		if (this.cancelTrns.containsKey(trn)) {
 			HashSet<Integer> set = this.cancelTrns.get(trn);
 			if (set != null) {
-				for (Integer keys : this.tradeCache.keySet()) {
+				for (Integer keys : set) {
 					Trade trade = this.tradeCache.get(keys);
 					if (trade.getPartyName().equals(partyName)) {
-						return new CustomResponse<>("Trade fetched successfully!", HttpStatus.ACCEPTED.value(), trade);
+						return new CustomResponse<>("Trade fetched successfully in cancel!",
+								HttpStatus.ACCEPTED.value(), trade);
 					}
 				}
 			}
 		}
+
 		// checking if trn is in trade table
 		for (Integer keys : this.tradeCache.keySet()) {
 			Trade trade = this.tradeCache.get(keys);
@@ -314,12 +318,19 @@ public class TradeServiceImpl implements TradeService {
 
 	@Override
 	public CustomResponse<Trade> deleteTrade(int id) {
-		Trade trade = this.tradeRepository.findById(id).get();
-		if (trade == null) {
+		this.dataFetch();
+		Optional<Trade> trade = this.tradeRepository.findById(id);
+		if (trade.isEmpty()) {
 			throw new NotFoundException("Trade with id " + id + " not found!");
 		}
+
+		this.tradeCache.remove(id);
+		for (CancelTrade c : trade.get().getAggregatedFrom()) {
+			this.cancelTrns.remove(c.getTradeRefNum());
+		}
 		this.tradeRepository.deleteById(id);
-		return new CustomResponse<>("Trade deleted successfully!", HttpStatus.ACCEPTED.value(), trade);
+
+		return new CustomResponse<>("Trade deleted successfully!", HttpStatus.ACCEPTED.value(), trade.get());
 	}
 
 }
