@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -28,10 +29,11 @@ public class Institution {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "institution_id")
 	private int institutionId;
-	@Column(name = "institution_name")
+	@Column(name = "institution_name", unique = true)
+	@NotNull(message = "institution Name cant be null")
 	private String institutionName;
 
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name = "i_id")
 	@JsonManagedReference
 	private List<Party> allParties;

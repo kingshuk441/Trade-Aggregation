@@ -5,25 +5,24 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.osttra.capstone.tradeaggregation.dao.PartyDaoImpl;
 import com.osttra.capstone.tradeaggregation.entity.Party;
+import com.osttra.capstone.tradeaggregation.repository.PartyRepository;
 
 public class PartyNameValidator implements ConstraintValidator<PartyName, String> {
 
 	@Autowired
-	private PartyDaoImpl partyDao;
-	String x;
+	private PartyRepository partyRepository;
 
 	@Override
 	public void initialize(PartyName partyName) {
-		x = partyName.value();
+
 	}
 
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext context) {
 		if (value == null)
 			return true;
-		Party p = this.partyDao.getPartyByName(value);
+		Party p = this.partyRepository.findByPartyName(value);
 		if (p != null && p.getInstitution() != null)
 			return true;
 		return false;

@@ -9,64 +9,63 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
 
 import com.osttra.capstone.tradeaggregation.customexception.FoundException;
 import com.osttra.capstone.tradeaggregation.customexception.NotFoundException;
-import com.osttra.capstone.tradeaggregation.dao.CancelTradeDao;
-import com.osttra.capstone.tradeaggregation.dao.InstitutionDao;
-import com.osttra.capstone.tradeaggregation.dao.PartyDao;
-import com.osttra.capstone.tradeaggregation.dao.TradeDao;
 import com.osttra.capstone.tradeaggregation.entity.CancelTrade;
 import com.osttra.capstone.tradeaggregation.entity.CustomResponse;
 import com.osttra.capstone.tradeaggregation.entity.Institution;
 import com.osttra.capstone.tradeaggregation.entity.Party;
 import com.osttra.capstone.tradeaggregation.entity.Trade;
 import com.osttra.capstone.tradeaggregation.objbuilder.TradeBuilder;
+import com.osttra.capstone.tradeaggregation.repository.CancelRepository;
+import com.osttra.capstone.tradeaggregation.repository.InstitutionRepository;
+import com.osttra.capstone.tradeaggregation.repository.PartyRepository;
+import com.osttra.capstone.tradeaggregation.repository.TradeRepository;
 import com.osttra.capstone.tradeaggregation.responsebody.TradeBody;
 import com.osttra.capstone.tradeaggregation.responsebody.TradeUpdateBody;
 
-@Repository
+@Service
 public class TradeServiceImpl implements TradeService {
 	@Autowired
-	private TradeDao tradeDao;
+	private TradeRepository tradeRepository;
 	@Autowired
-	private PartyDao partyDao;
+	private PartyRepository partyRepository;
 	@Autowired
-	private CancelTradeDao cancelDao;
+	private CancelRepository cancelRepository;
 	@Autowired
-	private InstitutionDao institutionDao;
+	private InstitutionRepository institutionRepository;
 
 	// pk vs trade
 	private HashMap<Integer, Trade> tradeCache;
-	// trn vs list of trade id
+	// trn vs list of trade id which have same trns
 	private HashMap<String, HashSet<Integer>> cancelTrns;
 	private boolean isFirstFetch;
 
-	@Transactional
+	// one time fetching from trade and cancel table
 	private void dataFetch() {
 		if (isFirstFetch == false) {
 			isFirstFetch = true;
 
-			List<Trade> allTrades = this.tradeDao.getTrades();
+			List<Trade> allTrades = this.tradeRepository.findAll();
 			this.tradeCache = new HashMap<>();
-			for (Trade t : allTrades) {
-				this.tradeCache.put(t.getTradeId(), t);
+			for (Trade trade : allTrades) {
+				this.tradeCache.put(trade.getTradeId(), trade);
 			}
 			this.cancelTrns = new HashMap<>();
-			List<CancelTrade> cancelTrades = this.cancelDao.getCancelTrades();
-			for (CancelTrade c : cancelTrades) {
-				HashSet<Integer> set = this.cancelTrns.get(c.getTradeRefNum());
+			List<CancelTrade> cancelTrades = this.cancelRepository.findAll();
+			for (CancelTrade cancelTrade : cancelTrades) {
+				HashSet<Integer> set = this.cancelTrns.get(cancelTrade.getTradeRefNum());
 				if (set == null) {
 					set = new HashSet<>();
 				}
-				set.add(c.getAggregatedTrade().getTradeId());
-				this.cancelTrns.put(c.getTradeRefNum(), set);
+				set.add(cancelTrade.getAggregatedTrade().getTradeId());
+				this.cancelTrns.put(cancelTrade.getTradeRefNum(), set);
 			}
 		}
 	}
 
-	@Transactional
 	private Trade matchingFields(Trade body) {
 		for (Integer keys : this.tradeCache.keySet()) {
 			Trade t = this.tradeCache.get(keys);
@@ -79,13 +78,12 @@ public class TradeServiceImpl implements TradeService {
 	}
 
 	@Override
-	@Transactional
 	public CustomResponse<Trade> addTrade(TradeBody body) {
 		this.dataFetch();
-
-		Party party = this.partyDao.getPartyByName(body.getPartyName());
+		Party party = this.partyRepository.findByPartyName(body.getPartyName());
 		String partyFullName = party.getPartyFullName();
-		String counterPartyFullName = this.partyDao.getPartyByName(body.getCounterPartyName()).getPartyFullName();
+		String counterPartyFullName = this.partyRepository.findByPartyName(body.getCounterPartyName())
+				.getPartyFullName();
 		int institutionId = party.getInstitution().getInstitutionId();
 		TradeBuilder tradeBuilder = new TradeBuilder(body);
 		Date creationDate = new Date();
@@ -94,7 +92,7 @@ public class TradeServiceImpl implements TradeService {
 		Trade matchedTrade = this.matchingFields(incomingTrade);
 		// unconf trade
 		if (matchedTrade == null) {
-			this.tradeDao.saveTrade(incomingTrade);
+			this.tradeRepository.save(incomingTrade);
 			this.tradeCache.put(incomingTrade.getTradeId(), incomingTrade);
 			return new CustomResponse<>("Trade added successfully!", HttpStatus.ACCEPTED.value(), incomingTrade);
 		} else {
@@ -105,9 +103,8 @@ public class TradeServiceImpl implements TradeService {
 	}
 
 	@Override
-	@Transactional
 	public CustomResponse<CancelTrade> getCancelTrades(int id) {
-		Trade trade = this.tradeDao.getTrade(id);
+		Trade trade = this.tradeRepository.findById(id).get();
 		if (trade == null) {
 			throw new NotFoundException("trade with id " + id + " not found!");
 		}
@@ -115,11 +112,10 @@ public class TradeServiceImpl implements TradeService {
 				trade.getAggregatedFrom());
 	}
 
-	@Transactional
 	private Trade aggregationTrade(Trade incomingTrade, Trade matchedTrade) {
-		Party party = this.partyDao.getPartyByName(incomingTrade.getPartyName());
+		Party party = this.partyRepository.findByPartyName(incomingTrade.getPartyName());
 		String partyFullName = party.getPartyFullName();
-		String counterPartyFullName = this.partyDao.getPartyByName(incomingTrade.getCounterPartyName())
+		String counterPartyFullName = this.partyRepository.findByPartyName(incomingTrade.getCounterPartyName())
 				.getPartyFullName();
 		int institutionId = party.getInstitution().getInstitutionId();
 
@@ -152,9 +148,9 @@ public class TradeServiceImpl implements TradeService {
 		newTrade.addCancelTrades(c1);
 		newTrade.addCancelTrades(c2);
 		// save the new trade in trade table
-		this.tradeDao.saveTrade(newTrade);
+		this.tradeRepository.save(newTrade);
 		// remove the matched trade from trade table
-		this.tradeDao.deleteTrade(matchedTrade.getTradeId());
+		this.tradeRepository.deleteById(matchedTrade.getTradeId());
 		// adding prev + new cancel trades in new trade
 		if (newAggrList != null) {
 			for (CancelTrade c : newAggrList) {
@@ -162,8 +158,8 @@ public class TradeServiceImpl implements TradeService {
 			}
 		}
 		// adding cancel trades in cancel table
-		this.cancelDao.addCancelTrade(c1);
-		this.cancelDao.addCancelTrade(c2);
+		this.cancelRepository.save(c1);
+		this.cancelRepository.save(c2);
 
 		// adding new trade in cache
 		this.tradeCache.put(newTrade.getTradeId(), newTrade);
@@ -190,28 +186,29 @@ public class TradeServiceImpl implements TradeService {
 	}
 
 	@Override
-	@Transactional
 	public CustomResponse<Trade> updateTrade(int id, TradeUpdateBody body) {
-		Trade t = this.tradeDao.getTrade(id);
+		Trade t = this.tradeRepository.findById(id).get();
 		if (t == null) {
 			throw new NotFoundException("trade with id " + id + " not found!");
 		}
 
-		TradeBuilder tb = new TradeBuilder(t, body, partyDao);
+		TradeBuilder tb = new TradeBuilder(t, body, partyRepository);
 		Trade newTrade = tb.getTrade();
 		newTrade.setTradeId(t.getTradeId());
 		int iid = 0;
 		String partyName = body.getPartyName();
+
 		String counterPartyName = body.getCounterPartyName();
 		if (partyName == null && counterPartyName != null) {
 			int iid1 = newTrade.getInstitutionId();
-			int iid2 = this.partyDao.getPartyByName(counterPartyName).getInstitution().getInstitutionId();
+			int iid2 = this.partyRepository.findByPartyName(counterPartyName).getInstitution().getInstitutionId();
 			if (iid1 == iid2) {
 				throw new FoundException("counter party cant be from same institution to party");
 			}
 
 		} else if (partyName != null && counterPartyName == null) {
-			iid = this.partyDao.getPartyByName(newTrade.getCounterPartyName()).getInstitution().getInstitutionId();
+			iid = this.partyRepository.findByPartyName(newTrade.getCounterPartyName()).getInstitution()
+					.getInstitutionId();
 		}
 
 		if (iid == newTrade.getInstitutionId()) {
@@ -220,11 +217,11 @@ public class TradeServiceImpl implements TradeService {
 		this.dataFetch();
 		Trade matchingTrade = this.matchingFields(newTrade);
 		if (matchingTrade == null) {
-			newTrade = this.tradeDao.updateTrade(newTrade);
+			newTrade = this.tradeRepository.save(newTrade);
 			return new CustomResponse<>("trade updated successfully!", HttpStatus.ACCEPTED.value(), newTrade);
 		} else {
 			Trade aggrTrade = this.aggregationTrade(newTrade, matchingTrade);
-			this.tradeDao.deleteTrade(newTrade.getTradeId());
+			this.tradeRepository.deleteById(newTrade.getTradeId());
 			this.tradeCache.remove(newTrade.getTradeId());
 			return new CustomResponse<>("trade updated successfully with aggregation!", HttpStatus.ACCEPTED.value(),
 					aggrTrade);
@@ -232,58 +229,56 @@ public class TradeServiceImpl implements TradeService {
 	}
 
 	@Override
-	@Transactional
 	public CustomResponse<Trade> findByPartyName(String partyName) {
-		List<Trade> allTrades = this.tradeDao.getTradesByPartyName(partyName);
+		List<Trade> allTrades = this.tradeRepository.findByPartyName(partyName);
 		return new CustomResponse<>("all trades fetched successfully!", HttpStatus.ACCEPTED.value(), allTrades);
 
 	}
 
 	@Override
-	@Transactional
 	public CustomResponse<Trade> findByInstitutionName(String institutionName) {
-		Institution i = this.institutionDao.getInstitutionByName(institutionName);
-		int id = i.getInstitutionId();
-		List<Trade> allTrades = this.tradeDao.getTradesByInstitutionId(id);
+		Institution institution = this.institutionRepository.findByInstitutionName(institutionName);
+		int institutionId = institution.getInstitutionId();
+		List<Trade> allTrades = this.tradeRepository.findByInstitutionId(institutionId);
 		return new CustomResponse<>("all trades fetched successfully!", HttpStatus.ACCEPTED.value(), allTrades);
 	}
 
 	@Override
-	@Transactional
 	public CustomResponse<Trade> getTrades() {
-		List<Trade> allTrades = this.tradeDao.getTrades();
+		List<Trade> allTrades = this.tradeRepository.findAll();
 		return new CustomResponse<>("All Trades fetched successfully!", HttpStatus.ACCEPTED.value(), allTrades);
 	}
 
 	@Override
-	@Transactional
-	public CustomResponse<Trade> getTrade(int id) {
-		Trade trade = this.tradeDao.getTrade(id);
+	public CustomResponse<Trade> getTrade(int tradeId) {
+		Trade trade = this.tradeRepository.findById(tradeId).get();
 		if (trade == null) {
-			throw new NotFoundException("trade with id " + id + " not found!");
+			throw new NotFoundException("trade with id " + tradeId + " not found!");
 		}
 		return new CustomResponse<>("Trade fetched successfully!", HttpStatus.ACCEPTED.value(), trade);
 	}
 
 	@Override
-	@Transactional
 	public CustomResponse<Trade> findByTrnParty(String trn, String partyName) {
 		this.dataFetch();
+
+		// checking if trn is in cancel trade table
 		if (this.cancelTrns.containsKey(trn)) {
 			HashSet<Integer> set = this.cancelTrns.get(trn);
 			if (set != null) {
 				for (Integer keys : this.tradeCache.keySet()) {
-					Trade t = this.tradeCache.get(keys);
-					if (t.getPartyName().equals(partyName)) {
-						return new CustomResponse<>("Trade fetched successfully!", HttpStatus.ACCEPTED.value(), t);
+					Trade trade = this.tradeCache.get(keys);
+					if (trade.getPartyName().equals(partyName)) {
+						return new CustomResponse<>("Trade fetched successfully!", HttpStatus.ACCEPTED.value(), trade);
 					}
 				}
 			}
 		}
+		// checking if trn is in trade table
 		for (Integer keys : this.tradeCache.keySet()) {
-			Trade t = this.tradeCache.get(keys);
-			if (t.getTradeRefNum().equals(trn) && t.getPartyName().equals(partyName)) {
-				return new CustomResponse<>("Trade fetched successfully!", HttpStatus.ACCEPTED.value(), t);
+			Trade trade = this.tradeCache.get(keys);
+			if (trade.getTradeRefNum().equals(trn) && trade.getPartyName().equals(partyName)) {
+				return new CustomResponse<>("Trade fetched successfully!", HttpStatus.ACCEPTED.value(), trade);
 			}
 
 		}
@@ -292,7 +287,6 @@ public class TradeServiceImpl implements TradeService {
 	}
 
 	@Override
-	@Transactional
 	public CustomResponse<Trade> findByPartyStatus(String partyName, String status) {
 		this.dataFetch();
 		if (status.toLowerCase().equals("cancel")) {
@@ -319,13 +313,12 @@ public class TradeServiceImpl implements TradeService {
 	}
 
 	@Override
-	@Transactional
 	public CustomResponse<Trade> deleteTrade(int id) {
-		Trade trade = this.tradeDao.getTrade(id);
+		Trade trade = this.tradeRepository.findById(id).get();
 		if (trade == null) {
 			throw new NotFoundException("Trade with id " + id + " not found!");
 		}
-		this.tradeDao.deleteTrade(id);
+		this.tradeRepository.deleteById(id);
 		return new CustomResponse<>("Trade deleted successfully!", HttpStatus.ACCEPTED.value(), trade);
 	}
 

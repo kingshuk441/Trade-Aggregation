@@ -8,35 +8,32 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.osttra.capstone.tradeaggregation.customexception.NotFoundException;
-import com.osttra.capstone.tradeaggregation.dao.CancelTradeDao;
 import com.osttra.capstone.tradeaggregation.entity.CancelTrade;
 import com.osttra.capstone.tradeaggregation.entity.CustomResponse;
 import com.osttra.capstone.tradeaggregation.entity.Trade;
+import com.osttra.capstone.tradeaggregation.repository.CancelRepository;
 
 @Service
 public class CancelTradeServiceImpl implements CancelTradeService {
 	@Autowired
-	private CancelTradeDao cancelTradeDao;
+	private CancelRepository cancelRepository;
 
 	@Override
-	@Transactional
 	public CustomResponse<CancelTrade> addCancelTrade(CancelTrade cancel) {
-		CancelTrade c = this.cancelTradeDao.addCancelTrade(cancel);
+		CancelTrade c = this.cancelRepository.save(cancel);
 		return new CustomResponse<>("cancel trades added successfully!", HttpStatus.ACCEPTED.value(), c);
 
 	}
 
 	@Override
-	@Transactional
 	public CustomResponse<CancelTrade> getCancelTrades() {
-		List<CancelTrade> list = this.cancelTradeDao.getCancelTrades();
+		List<CancelTrade> list = this.cancelRepository.findAll();
 		return new CustomResponse<>("all cancel trades fetched successfully!", HttpStatus.ACCEPTED.value(), list);
 	}
 
 	@Override
-	@Transactional
 	public CustomResponse<CancelTrade> getCancelTrade(int id) {
-		CancelTrade c = this.cancelTradeDao.getCancelTrade(id);
+		CancelTrade c = this.cancelRepository.findById(id).get();
 		if (c == null) {
 			throw new NotFoundException("cancel trade with id " + id + " not found!");
 		}

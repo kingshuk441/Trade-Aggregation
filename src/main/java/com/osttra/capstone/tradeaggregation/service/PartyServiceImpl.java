@@ -5,53 +5,48 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.osttra.capstone.tradeaggregation.customexception.FoundException;
 import com.osttra.capstone.tradeaggregation.customexception.NotFoundException;
-import com.osttra.capstone.tradeaggregation.dao.InstitutionDao;
-import com.osttra.capstone.tradeaggregation.dao.PartyDao;
 import com.osttra.capstone.tradeaggregation.entity.CustomResponse;
 import com.osttra.capstone.tradeaggregation.entity.Institution;
 import com.osttra.capstone.tradeaggregation.entity.Party;
+import com.osttra.capstone.tradeaggregation.repository.InstitutionRepository;
+import com.osttra.capstone.tradeaggregation.repository.PartyRepository;
 import com.osttra.capstone.tradeaggregation.responsebody.PartyBody;
 
 @Service
 public class PartyServiceImpl implements PartyService {
 	@Autowired
-	private PartyDao partyDao;
+	private PartyRepository partyRepository;
 	@Autowired
-	private InstitutionDao institutionDao;
+	private InstitutionRepository institutionRepository;
 
 	@Override
-	@Transactional
 	public CustomResponse<Party> getParties() {
-		List<Party> list = this.partyDao.getParties();
-		return new CustomResponse<>("all party fetched successfully!", HttpStatus.ACCEPTED.value(), list);
+		List<Party> allParties = this.partyRepository.findAll();
+		return new CustomResponse<>("all party fetched successfully!", HttpStatus.ACCEPTED.value(), allParties);
 	}
 
 	@Override
-	@Transactional
-	public CustomResponse<Party> getParty(int id) {
-		Party p = this.partyDao.getParty(id);
-		if (p == null) {
-			throw new NotFoundException("party with id " + id + " not found!");
+	public CustomResponse<Party> getParty(int partyId) {
+		Party party = this.partyRepository.findById(partyId).get();
+		if (party == null) {
+			throw new NotFoundException("party with id " + partyId + " not found!");
 		}
-		return new CustomResponse<>("party fetched successfully!", HttpStatus.ACCEPTED.value(), p);
+		return new CustomResponse<>("party fetched successfully!", HttpStatus.ACCEPTED.value(), party);
 	}
 
 	@Override
-	@Transactional
-	public CustomResponse<Institution> getInstitution(int id) {
-		Party p = this.partyDao.getParty(id);
-		if (p == null) {
-			throw new NotFoundException("party with id " + id + " not found!");
+	public CustomResponse<Institution> getInstitution(int partyId) {
+		Party party = this.partyRepository.findById(partyId).get();
+		if (party == null) {
+			throw new NotFoundException("party with id " + partyId + " not found!");
 		}
-		Institution i = p.getInstitution();
-		return new CustomResponse<>("Institution fetched successfully!", HttpStatus.ACCEPTED.value(), i);
+		Institution institution = party.getInstitution();
+		return new CustomResponse<>("Institution fetched successfully!", HttpStatus.ACCEPTED.value(), institution);
 	}
 
-	@Transactional
 	private void getPartyNameHelper(String s) {
 		try {
 			CustomResponse<Party> res = this.getPartyByName(s);
@@ -63,69 +58,67 @@ public class PartyServiceImpl implements PartyService {
 	}
 
 	@Override
-	@Transactional
 	public CustomResponse<Party> addParty(PartyBody party) {
-		String name = party.getPartyName();
-		this.getPartyNameHelper(name);
-		Party p = new Party();
-		p.setPartyName(name);
-		p.setPartyFullName(party.getPartyFullName());
+
+		String partyName = party.getPartyName();
+		this.getPartyNameHelper(partyName);
+		Party newParty = new Party();
+		newParty.setPartyName(partyName);
+		newParty.setPartyFullName(party.getPartyFullName());
 		int institutionId = party.getInstitution();
-		Institution i = this.institutionDao.getInstitution(institutionId);
-		if (i == null) {
-			throw new NotFoundException("Institution with name " + name + " not found!");
+		if (institutionId != 0) {
+			Institution institution = this.institutionRepository.findById(institutionId).get();
+			if (institution == null) {
+				throw new NotFoundException("Institution with name " + partyName + " not found!");
+			}
+			newParty.setInstitution(institution);
 		}
-		p.setInstitution(i);
-		Party newParty = this.partyDao.save(p);
+		newParty = this.partyRepository.save(newParty);
 		return new CustomResponse<>("Party Added successfully!", HttpStatus.ACCEPTED.value(), newParty);
 	}
 
 	@Override
-	@Transactional
 	public CustomResponse<Party> getPartyByName(String name) {
-		Party p = this.partyDao.getPartyByName(name);
-		if (p == null) {
+		Party party = this.partyRepository.findByPartyName(name);
+		if (party == null) {
 			throw new NotFoundException("Party with name " + name + " not found!");
 		}
 
-		return new CustomResponse<>("Party fetched successfully!", HttpStatus.ACCEPTED.value(), p);
+		return new CustomResponse<>("Party fetched successfully!", HttpStatus.ACCEPTED.value(), party);
 	}
 
 	@Override
-	@Transactional
-	public CustomResponse<Party> updateParty(int id, PartyBody party) {
-		Party p = this.partyDao.getParty(id);
-		if (p == null) {
-			throw new NotFoundException("party with id " + id + " not found!");
+	public CustomResponse<Party> updateParty(int partyId, PartyBody partyDetails) {
+		Party party = this.partyRepository.findById(partyId).get();
+		if (party == null) {
+			throw new NotFoundException("party with id " + partyId + " not found!");
 		}
-		String name = party.getPartyName();
-		int institutionId = party.getInstitution();
+		String name = partyDetails.getPartyName();
+		int institutionId = partyDetails.getInstitution();
 
-		if (institutionId != 0 && p.getInstitution() == null) {
-			Institution i = this.institutionDao.getInstitution(institutionId);
+		if (institutionId != 0 && party.getInstitution() == null) {
+			Institution i = this.institutionRepository.findById(institutionId).get();
 			if (i == null) {
-				throw new NotFoundException("Institution with id " + id + " not found!");
+				throw new NotFoundException("Institution with id " + partyId + " not found!");
 			}
-			p.setInstitution(i);
+			party.setInstitution(i);
 		}
 		if (name != null) {
-			p.setPartyName(name);
+			party.setPartyName(name);
 		}
-		if (party.getPartyFullName() != null) {
-			p.setPartyFullName(party.getPartyFullName());
+		if (partyDetails.getPartyFullName() != null) {
 		}
-		p = this.partyDao.save(p);
-		return new CustomResponse<>("Party Updated successfully!", HttpStatus.ACCEPTED.value(), p);
+		party = this.partyRepository.save(party);
+		return new CustomResponse<>("Party Updated successfully!", HttpStatus.ACCEPTED.value(), party);
 	}
 
 	@Override
-	@Transactional
-	public CustomResponse<Party> deleteParty(int id) {
-		Party p = this.partyDao.getParty(id);
-		if (p == null) {
-			throw new NotFoundException("party with id " + id + " not found!");
+	public CustomResponse<Party> deleteParty(int partyId) {
+		Party party = this.partyRepository.findById(partyId).get();
+		if (party == null) {
+			throw new NotFoundException("party with id " + partyId + " not found!");
 		}
-		this.partyDao.deleteParty(id);
-		return new CustomResponse<>("Party Deleted successfully!", HttpStatus.ACCEPTED.value(), p);
+		this.partyRepository.deleteById(partyId);
+		return new CustomResponse<>("Party Deleted successfully!", HttpStatus.ACCEPTED.value(), party);
 	}
 }

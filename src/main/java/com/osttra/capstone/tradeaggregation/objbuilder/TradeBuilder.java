@@ -4,10 +4,10 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
-import com.osttra.capstone.tradeaggregation.dao.PartyDao;
 import com.osttra.capstone.tradeaggregation.entity.CancelTrade;
 import com.osttra.capstone.tradeaggregation.entity.Party;
 import com.osttra.capstone.tradeaggregation.entity.Trade;
+import com.osttra.capstone.tradeaggregation.repository.PartyRepository;
 import com.osttra.capstone.tradeaggregation.responsebody.TradeBody;
 import com.osttra.capstone.tradeaggregation.responsebody.TradeUpdateBody;
 
@@ -95,13 +95,13 @@ public class TradeBuilder {
 //		t.setVersion(t.getVersion() + 1);
 //	}
 
-	public TradeBuilder(Trade t, TradeUpdateBody body, PartyDao partyDao) {
+	public TradeBuilder(Trade t, TradeUpdateBody body, PartyRepository partyDao) {
 		this.tradeSetter = new TradeConstruct();
 		// tradeId,creTimeStamp,status,confirmTS
 		this.tradeRefNum = body.getTradeRefNum() == null ? t.getTradeRefNum() : body.getTradeRefNum();
 		if (body.getPartyName() != null) {
 			this.partyName = body.getPartyName();
-			Party p = partyDao.getPartyByName(body.getPartyName());
+			Party p = partyDao.findByPartyName(body.getPartyName());
 			this.partyFullName = p.getPartyFullName();
 			this.institutionId = p.getInstitution().getInstitutionId();
 		} else {
@@ -111,7 +111,7 @@ public class TradeBuilder {
 		}
 		if (body.getCounterPartyName() != null) {
 			this.counterPartyName = body.getCounterPartyName();
-			Party p = partyDao.getPartyByName(body.getCounterPartyName());
+			Party p = partyDao.findByPartyName(body.getCounterPartyName());
 			// TODO party and counter party cant be same
 			this.counterPartyFullName = p.getPartyFullName();
 		} else {

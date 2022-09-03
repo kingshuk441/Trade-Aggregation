@@ -10,6 +10,7 @@ public class TradeUpdateBody {
 	// not used
 //	private int tradeId;
 	private String tradeRefNum;
+
 	@PartyName
 	@PartySame
 	private String partyName;

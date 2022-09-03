@@ -5,15 +5,15 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.osttra.capstone.tradeaggregation.dao.PartyDao;
 import com.osttra.capstone.tradeaggregation.entity.Party;
+import com.osttra.capstone.tradeaggregation.repository.PartyRepository;
 
 public class PartySameValidator implements ConstraintValidator<PartySame, String> {
 
 	static String def;
 
 	@Autowired
-	private PartyDao partyDao;
+	private PartyRepository partyRepository;
 
 	@Override
 	public void initialize(PartySame partyName) {
@@ -25,13 +25,15 @@ public class PartySameValidator implements ConstraintValidator<PartySame, String
 			def = null;
 			return true;
 		}
-		Party p = this.partyDao.getPartyByName(value);
+
+		Party p = this.partyRepository.findByPartyName(value);
 		if (p == null) {
 			def = null;
 			return true;
 		}
 
 		String institution = p.getInstitution().getInstitutionName();
+
 		if (def == null) {
 			def = institution;
 			return true;

@@ -8,6 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
@@ -23,10 +24,12 @@ public class Party {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "party_id")
 	private int partyId;
-	@Column(name = "party_name")
+	@Column(name = "party_name", unique = true)
+	@NotNull(message = "party Name cant be null")
 	private String partyName;
 
 	@Column(name = "party_full_name")
+	@NotNull(message = "party Full Name cant be null")
 	private String partyFullName;
 
 	@OneToOne

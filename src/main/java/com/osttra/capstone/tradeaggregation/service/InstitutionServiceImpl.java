@@ -7,92 +7,100 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.osttra.capstone.tradeaggregation.customexception.FoundException;
 import com.osttra.capstone.tradeaggregation.customexception.NotFoundException;
-import com.osttra.capstone.tradeaggregation.dao.InstitutionDao;
-import com.osttra.capstone.tradeaggregation.dao.PartyDao;
 import com.osttra.capstone.tradeaggregation.entity.CustomResponse;
 import com.osttra.capstone.tradeaggregation.entity.Institution;
 import com.osttra.capstone.tradeaggregation.entity.Party;
+import com.osttra.capstone.tradeaggregation.repository.InstitutionRepository;
+import com.osttra.capstone.tradeaggregation.repository.PartyRepository;
 import com.osttra.capstone.tradeaggregation.responsebody.InstitutionBody;
 
 @Service
 public class InstitutionServiceImpl implements InstitutionService {
 	@Autowired
-	private InstitutionDao institutionDao;
+	private InstitutionRepository institutionRepository;
 	@Autowired
-	private PartyDao partyDao;
+	private PartyRepository partyRepository;
 
 	@Override
-	@Transactional
 	public CustomResponse<Institution> getInstitutions() {
-		List<Institution> list = this.institutionDao.getInstitutions();
-		return new CustomResponse<>("all institution fetched successfully!", HttpStatus.ACCEPTED.value(), list);
+		List<Institution> allInstitutions = this.institutionRepository.findAll();
+		return new CustomResponse<>("all institution fetched successfully!", HttpStatus.ACCEPTED.value(),
+				allInstitutions);
 	}
 
 	@Override
-	@Transactional
-	public CustomResponse<Institution> getInstitution(int id) {
-		Institution i = this.institutionDao.getInstitution(id);
-		if (i == null) {
-			throw new NotFoundException("Institution with id " + id + " not found!");
+	public CustomResponse<Institution> getInstitution(int instiId) {
+		Institution institution = this.institutionRepository.findById(instiId).get();
+		if (institution == null) {
+			throw new NotFoundException("Institution with id " + instiId + " not found!");
 		}
-		return new CustomResponse<>("institution of id " + id + " fetched successfully!", HttpStatus.ACCEPTED.value(),
-				i);
+		return new CustomResponse<>("institution of id " + instiId + " fetched successfully!",
+				HttpStatus.ACCEPTED.value(), institution);
 	}
 
 	@Override
-	@Transactional
-	public CustomResponse<Party> getParties(int id) {
-		Institution i = this.institutionDao.getInstitution(id);
-		if (i == null) {
-			throw new NotFoundException("Institution with id " + id + " not found!");
+	public CustomResponse<Party> getParties(int instiId) {
+		Institution institution = this.institutionRepository.findById(instiId).get();
+		if (institution == null) {
+			throw new NotFoundException("Institution with id " + instiId + " not found!");
 		}
-		List<Party> p = this.institutionDao.getParties(i, id);
-		return new CustomResponse<>("parties fetched successfully!", HttpStatus.ACCEPTED.value(), p);
+		List<Party> allParties = institution.getAllParties();
+		return new CustomResponse<>("parties fetched successfully!", HttpStatus.ACCEPTED.value(), allParties);
 	}
 
-	@Override
-	@Transactional
-	public CustomResponse<Institution> addParty(int id, int partyId) {
-		Party p = this.partyDao.getParty(partyId);
-		if (p == null) {
-			throw new NotFoundException("party with id " + id + " not found!");
-		}
-		Institution i = this.institutionDao.addParty(id, p);
-		if (i == null) {
-			throw new RuntimeException("already added!");
-		}
-		return new CustomResponse<>("party added successfully!", HttpStatus.ACCEPTED.value(), i);
+	public Institution addParty(int instiId, Party partyToAdd) {
 
-	}
-
-	@Override
-	@Transactional
-	public CustomResponse<Institution> addInstitution(InstitutionBody body) {
-		String name = body.getInstitutionName();
-		this.getInstituteNameHelper(name);
-		Institution i = new Institution();
-		i.setInstitutionId(0);
-		i.setInstitutionName(name);
-		HashSet<Integer> set = new HashSet<>();
-		if (body.getParties() != null) {
-			for (int idx : body.getParties()) {
-				if (set.contains(idx) == false) {
-					set.add(idx);
-					Party p = this.partyDao.getParty(idx);
-					i.addParty(p);
-				}
+		Institution institution = this.institutionRepository.findById(instiId).get();
+		for (Party party : institution.getAllParties()) {
+			if (party.getPartyId() == partyToAdd.getPartyId()) {
+				return null;
 			}
 		}
 
-		i = this.institutionDao.saveInstitution(i);
-		return new CustomResponse<>("institution added successfully!", HttpStatus.ACCEPTED.value(), i);
+		institution.addParty(partyToAdd);
+		return institution;
+
 	}
 
-	@Transactional
+	@Override
+	public CustomResponse<Institution> addParty(int instiId, int partyId) {
+		Party party = this.partyRepository.findById(partyId).get();
+		if (party == null) {
+			throw new NotFoundException("party with id " + instiId + " not found!");
+		}
+		Institution institution = this.addParty(instiId, party);
+		if (institution == null) {
+			throw new RuntimeException("already added!");
+		}
+		this.institutionRepository.save(institution);
+		return new CustomResponse<>("party added successfully!", HttpStatus.ACCEPTED.value(), institution);
+
+	}
+
+	@Override
+	public CustomResponse<Institution> addInstitution(InstitutionBody body) {
+		String intitutionName = body.getInstitutionName();
+		this.getInstituteNameHelper(intitutionName);
+		Institution institution = new Institution();
+		institution.setInstitutionName(intitutionName);
+		HashSet<Integer> set = new HashSet<>();
+		if (body.getParties() != null) {
+			for (int partyId : body.getParties()) {
+				if (set.contains(partyId) == false) {
+					set.add(partyId);
+					Party party = this.partyRepository.findById(partyId).get();
+					institution.addParty(party);
+				}
+			}
+		}
+		institution = this.institutionRepository.save(institution);
+		return new CustomResponse<>("institution added successfully!", HttpStatus.ACCEPTED.value(), institution);
+	}
+
+	// only for exception handling
 	private void getInstituteNameHelper(String s) {
 		try {
 			CustomResponse<Institution> res = this.getInstitutionByName(s);
@@ -104,75 +112,72 @@ public class InstitutionServiceImpl implements InstitutionService {
 	}
 
 	@Override
-	@Transactional
 	public CustomResponse<Institution> getInstitutionByName(String name) {
-		Institution i = this.institutionDao.getInstitutionByName(name);
-		if (i == null) {
+		Institution institution = this.institutionRepository.findByInstitutionName(name);
+		if (institution == null) {
 			throw new NotFoundException("Institution with name " + name + " not found!");
 		}
 
-		return new CustomResponse<>("Institute fetched successfully!", HttpStatus.ACCEPTED.value(), i);
+		return new CustomResponse<>("Institute fetched successfully!", HttpStatus.ACCEPTED.value(), institution);
 	}
 
 	@Override
-	@Transactional
-	public CustomResponse<Institution> updateInstitution(int id, InstitutionBody body) {
-		Institution i = this.institutionDao.getInstitution(id);
-		if (i == null) {
-			throw new NotFoundException("Institution with id " + id + " not found!");
+	public CustomResponse<Institution> updateInstitution(int instiId, InstitutionBody body) {
+		Institution institution = this.institutionRepository.findById(instiId).get();
+		if (institution == null) {
+			throw new NotFoundException("Institution with id " + instiId + " not found!");
 		}
 		if (body.getInstitutionName() != null) {
-			i.setInstitutionName(body.getInstitutionName());
+			institution.setInstitutionName(body.getInstitutionName());
 		}
 		if (body.getParties() != null) {
-			HashSet<Integer> vis = new HashSet<>();
+			HashSet<Integer> alreadyPresent = new HashSet<>();
 			List<Party> addParties = new ArrayList<>();
-			for (int idx : body.getParties()) {
-				Party p = this.partyDao.getParty(idx);
-				addParties.add(p);
-				vis.add(idx);
+			for (int partyId : body.getParties()) {
+				Party party = this.partyRepository.findById(partyId).get();
+				addParties.add(party);
+				alreadyPresent.add(partyId);
 			}
-			for (Party p : i.getAllParties()) {
-				if (vis.contains(p.getPartyId()) == false) {
-					addParties.add(p);
-					vis.add(p.getPartyId());
+			for (Party party : institution.getAllParties()) {
+				if (alreadyPresent.contains(party.getPartyId()) == false) {
+					addParties.add(party);
+					alreadyPresent.add(party.getPartyId());
 				}
 			}
-			i.setAllParties(addParties);
+			institution.setAllParties(addParties);
 		}
-		Institution updatedInstitution = this.institutionDao.saveInstitution(i);
+		Institution updatedInstitution = this.institutionRepository.save(institution);
 		return new CustomResponse<>("Institute updated successfully!", HttpStatus.ACCEPTED.value(), updatedInstitution);
 	}
 
 	@Override
-	@Transactional
-	public CustomResponse<Institution> deleteInstitution(int id) {
-		Institution i = this.institutionDao.getInstitution(id);
-		if (i == null) {
-			throw new NotFoundException("Institution with id " + id + " not found!");
+	public CustomResponse<Institution> deleteInstitution(int instiId) {
+		Institution institution = this.institutionRepository.findById(instiId).get();
+		if (institution == null) {
+			throw new NotFoundException("Institution with id " + instiId + " not found!");
 		}
-		Institution d = new Institution(i);
-		this.institutionDao.deleteInstitution(id);
+		Institution institutionToDelete = new Institution(institution);
+		this.institutionRepository.deleteById(instiId);
 
-		return new CustomResponse<>("Institute deleted successfully!", HttpStatus.ACCEPTED.value(), d);
+		return new CustomResponse<>("Institute deleted successfully!", HttpStatus.ACCEPTED.value(),
+				institutionToDelete);
 	}
 
 	@Override
-	@Transactional
-	public CustomResponse<Institution> removeParty(int id, int partyId) {
-		Institution i = this.institutionDao.getInstitution(id);
-		if (i == null) {
-			throw new NotFoundException("Institution with id " + id + " not found!");
+	public CustomResponse<Institution> removeParty(int instiId, int partyId) {
+		Institution institution = this.institutionRepository.findById(instiId).get();
+		if (institution == null) {
+			throw new NotFoundException("Institution with id " + instiId + " not found!");
 		}
-		List<Party> allParties = i.getAllParties();
+		List<Party> allParties = institution.getAllParties();
 		for (int j = 0; j < allParties.size(); j++) {
-			Party p = allParties.get(j);
-			if (p.getPartyId() == partyId) {
-				Party t2 = allParties.get(allParties.size() - 1);
-				allParties.set(j, t2);
+			Party party = allParties.get(j);
+			if (party.getPartyId() == partyId) {
+				Party partyAtLastIndex = allParties.get(allParties.size() - 1);
+				allParties.set(j, partyAtLastIndex);
 				allParties.remove(allParties.size() - 1);
-				i = this.institutionDao.saveInstitution(i);
-				return new CustomResponse<>("Party deleted successfully!", HttpStatus.ACCEPTED.value(), i);
+				institution = this.institutionRepository.save(institution);
+				return new CustomResponse<>("Party deleted successfully!", HttpStatus.ACCEPTED.value(), institution);
 			}
 		}
 		throw new NotFoundException("Party with id " + partyId + " not found!");
