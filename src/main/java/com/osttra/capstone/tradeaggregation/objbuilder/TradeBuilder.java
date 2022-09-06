@@ -135,27 +135,27 @@ public class TradeBuilder {
 		this.fillValues();
 	}
 
-	public void constructNewTrade(String partyFullName, String counterPartyFullName, int institutionId,
-			Date creationDate) {
+	private void constructTrade(String partyFullName, String counterPartyFullName, int institutionId) {
 		this.partyFullName = partyFullName;
 		this.counterPartyFullName = counterPartyFullName;
-		this.creationTimeStamp = creationDate;
-		this.versionTimeStamp = creationDate;
+		this.creationTimeStamp = new Date();
+		this.versionTimeStamp = new Date();
 		this.version = 0;
-		this.status = "UF";
+
 		this.institutionId = institutionId;
+	}
+
+	public void constructNewTrade(String partyFullName, String counterPartyFullName, int institutionId) {
+		this.constructTrade(partyFullName, counterPartyFullName, institutionId);
+		this.status = "UF";
 		this.fillValues();
 	}
 
-	public void mergeNewTrade(String partyFullName, String counterPartyFullName, int institutionId,
-			Date updatedTimeStamp, String trn, long notionalAmount, Date cd) {
-		this.partyFullName = partyFullName;
-		this.counterPartyFullName = counterPartyFullName;
-		this.creationTimeStamp = cd;
-		this.versionTimeStamp = updatedTimeStamp;
-		this.version = 0;
+	public void mergeNewTrade(String partyFullName, String counterPartyFullName, int institutionId, String trn,
+			long notionalAmount) {
+		this.constructTrade(partyFullName, counterPartyFullName, institutionId);
+		this.version = 1;
 		this.status = "AGG";
-		this.institutionId = institutionId;
 		this.notionalAmount = notionalAmount;
 		this.tradeRefNum = trn;
 		this.fillValues();

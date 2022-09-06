@@ -86,8 +86,7 @@ public class TradeServiceImpl implements TradeService {
 				.getPartyFullName();
 		int institutionId = party.getInstitution().getInstitutionId();
 		TradeBuilder tradeBuilder = new TradeBuilder(body);
-		Date creationDate = new Date();
-		tradeBuilder.constructNewTrade(partyFullName, counterPartyFullName, institutionId, creationDate);
+		tradeBuilder.constructNewTrade(partyFullName, counterPartyFullName, institutionId);
 		Trade incomingTrade = tradeBuilder.getTrade();
 		Trade matchedTrade = this.matchingFields(incomingTrade);
 		// unconf trade
@@ -123,15 +122,17 @@ public class TradeServiceImpl implements TradeService {
 		Date updatedDate = new Date();
 		String newTrn = incomingTrade.getPartyName() + "_" + incomingTrade.getCounterPartyName() + "_" + updatedDate;
 		TradeBuilder tradeBuilder = new TradeBuilder(incomingTrade);
-		tradeBuilder.mergeNewTrade(partyFullName, counterPartyFullName, institutionId, updatedDate, newTrn, sumAmount,
-				matchedTrade.getCreationTimeStamp());
+		tradeBuilder.mergeNewTrade(partyFullName, counterPartyFullName, institutionId, newTrn, sumAmount);
 		// aggr trade with updated values
 		Trade newTrade = tradeBuilder.getTrade();
 
 		// make the incoming and matched trade as cancel
-		CancelTrade c1 = new CancelTrade(matchedTrade.getNotionalAmount(), matchedTrade.getCreationTimeStamp(),
-				matchedTrade.getVersionTimeStamp(), matchedTrade.getConfirmationTimeStamp(), newTrade,
-				matchedTrade.getTradeRefNum());
+		CancelTrade c1 = null;
+		if (matchedTrade.getStatus().equals("UF")) {
+			c1 = new CancelTrade(matchedTrade.getNotionalAmount(), matchedTrade.getCreationTimeStamp(),
+					matchedTrade.getVersionTimeStamp(), matchedTrade.getConfirmationTimeStamp(), newTrade,
+					matchedTrade.getTradeRefNum());
+		}
 		CancelTrade c2 = new CancelTrade(incomingTrade.getNotionalAmount(), incomingTrade.getCreationTimeStamp(),
 				incomingTrade.getVersionTimeStamp(), incomingTrade.getConfirmationTimeStamp(), newTrade,
 				incomingTrade.getTradeRefNum());
@@ -147,8 +148,8 @@ public class TradeServiceImpl implements TradeService {
 		this.tradeRepository.save(newTrade);
 		newTrade.setAggregatedFrom(newAggrList);
 		this.tradeRepository.save(newTrade);
-
-		newTrade.addCancelTrades(c1);
+		if (c1 != null)
+			newTrade.addCancelTrades(c1);
 		newTrade.addCancelTrades(c2);
 		// save the new trade in trade table
 		// adding cancel trades in cancel table
@@ -169,13 +170,15 @@ public class TradeServiceImpl implements TradeService {
 		this.tradeCache.remove(matchedTrade.getTradeId());
 
 		// adding cancel trns in cancel cache
-		HashSet<Integer> set = this.cancelTrns.get(c1.getTradeRefNum());
-		if (set == null) {
-			set = new HashSet<>();
+		HashSet<Integer> set;
+		if (c1 != null) {
+			set = this.cancelTrns.get(c1.getTradeRefNum());
+			if (set == null) {
+				set = new HashSet<>();
+			}
+			set.add(c1.getAggregatedTrade().getTradeId());
+			this.cancelTrns.put(c1.getTradeRefNum(), set);
 		}
-		set.add(c1.getAggregatedTrade().getTradeId());
-		this.cancelTrns.put(c1.getTradeRefNum(), set);
-
 		set = this.cancelTrns.get(c2.getTradeRefNum());
 		if (set == null) {
 			set = new HashSet<>();
@@ -218,7 +221,7 @@ public class TradeServiceImpl implements TradeService {
 		}
 		this.dataFetch();
 		Trade matchingTrade = this.matchingFields(newTrade);
-		if (matchingTrade == null) {
+		if (matchingTrade == null || matchingTrade.getTradeId() == newTrade.getTradeId()) {
 			newTrade = this.tradeRepository.save(newTrade);
 			return new CustomResponse<>("trade updated successfully!", HttpStatus.ACCEPTED.value(), newTrade);
 		} else {

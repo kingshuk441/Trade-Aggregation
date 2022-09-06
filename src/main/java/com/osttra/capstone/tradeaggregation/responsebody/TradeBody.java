@@ -9,16 +9,20 @@ import javax.validation.constraints.Size;
 
 import com.osttra.capstone.tradeaggregation.validation.PartyName;
 import com.osttra.capstone.tradeaggregation.validation.PartySame;
+import com.osttra.capstone.tradeaggregation.validation.UniqueTrn;
+import com.osttra.capstone.tradeaggregation.validation.ValidDate;
 
 public class TradeBody {
 	@NotNull(message = "trade ref num is required")
 	@NotBlank(message = "cant be blank")
+	@UniqueTrn
 	private String tradeRefNum;
 	@PartyName(message = "party name (${validatedValue}) must be valid")
 	@PartySame(message = "party name (${validatedValue}) and counter party name cant be same")
 	@NotNull(message = "party name  is required")
 	@Size(max = 20, message = "party name length cant be more than 20")
 	@NotBlank(message = "cant be blank")
+	@UniqueTrn
 	private String partyName;
 	@PartyName(message = "counter party (${validatedValue}) name must be valid")
 	@PartySame(message = "party name and counter party name (${validatedValue}) cant be same")
@@ -27,8 +31,10 @@ public class TradeBody {
 	@NotBlank(message = "cant be blank")
 	private String counterPartyName;
 	@NotNull(message = "trade date is required")
+	@ValidDate
 	private LocalDate tradeDate;
 	@NotNull(message = "effective date is required")
+	@ValidDate
 	private LocalDate effectiveDate;
 	@NotNull(message = "instrument id is required")
 	@Size(max = 40, message = "instrument id length cant be more than 40")
@@ -37,6 +43,7 @@ public class TradeBody {
 	@Min(value = 1, message = "notional amount cant be 0")
 	private long notionalAmount;
 	@NotNull(message = "maturity date is required")
+	@ValidDate
 	private LocalDate maturityDate;
 	@NotNull(message = "currency is required")
 	@Size(max = 3, message = "currency length cant be more than 3")

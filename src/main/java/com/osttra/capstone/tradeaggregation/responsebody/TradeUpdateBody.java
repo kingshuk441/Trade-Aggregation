@@ -5,6 +5,7 @@ import java.util.Date;
 
 import com.osttra.capstone.tradeaggregation.validation.PartyName;
 import com.osttra.capstone.tradeaggregation.validation.PartySame;
+import com.osttra.capstone.tradeaggregation.validation.ValidDate;
 
 public class TradeUpdateBody {
 	// not used
@@ -21,16 +22,19 @@ public class TradeUpdateBody {
 	private String counterPartyName;
 	// not used
 //	private String counterPartyFullName;
+	@ValidDate
 	private LocalDate tradeDate;
+	@ValidDate
 	private LocalDate effectiveDate;
 	private String instrumentId;
 	private long notionalAmount;
+	@ValidDate
 	private LocalDate maturityDate;
 	private String currency;
 	private String seller;
 	private String buyer;
 	// not used
-//	private Date creationTimeStamp;
+	// private Date creationTimeStamp;
 	private Date versionTimeStamp;
 	private Date confirmationTimeStamp;
 	private int version;
