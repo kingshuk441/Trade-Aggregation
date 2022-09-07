@@ -89,7 +89,7 @@ public class Trade {
 	public Trade() {
 	}
 
-	public Trade(String tradeRefNum, String partyName,
+	public Trade(int tradeId, String tradeRefNum, String partyName,
 			@Size(max = 200, message = "party full name length cant be more than 200") @NotNull(message = "party full name is required") String partyFullName,
 			@Size(max = 200, message = "party full name length cant be more than 200") String counterPartyName,
 			@Size(max = 200, message = "counter party full name length cant be more than 200") String counterPartyFullName,
@@ -99,9 +99,9 @@ public class Trade {
 			@NotNull(message = "version timestamp is required") Date versionTimeStamp, Date confirmationTimeStamp,
 			int version,
 			@Size(max = 50, message = "status length cant be more than 50") @NotNull(message = "status is required") String status,
-			List<CancelTrade> aggregatedFrom,
 			@Min(value = 1, message = "institution id is required") int institutionId) {
 		super();
+		this.tradeId = tradeId;
 		this.tradeRefNum = tradeRefNum;
 		this.partyName = partyName;
 		this.partyFullName = partyFullName;
@@ -120,7 +120,6 @@ public class Trade {
 		this.confirmationTimeStamp = confirmationTimeStamp;
 		this.version = version;
 		this.status = status;
-		this.aggregatedFrom = aggregatedFrom;
 		this.institutionId = institutionId;
 	}
 

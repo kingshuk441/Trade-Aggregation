@@ -45,9 +45,10 @@ public class CancelTrade {
 
 	}
 
-	public CancelTrade(long notionalAmount, Date creationTimeStamp, Date versionTimeStamp, Date confirmationTimeStamp,
-			Trade aggregatedTrade, String tradeRefNum) {
+	public CancelTrade(int id, long notionalAmount, Date creationTimeStamp, Date versionTimeStamp,
+			Date confirmationTimeStamp, Trade aggregatedTrade, String tradeRefNum) {
 		super();
+		this.cancelId = id;
 		this.notionalAmount = notionalAmount;
 		this.creationTimeStamp = creationTimeStamp;
 		this.versionTimeStamp = versionTimeStamp;

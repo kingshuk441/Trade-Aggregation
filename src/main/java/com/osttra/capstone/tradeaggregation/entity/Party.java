@@ -41,8 +41,9 @@ public class Party {
 
 	}
 
-	public Party(String partyName, String partyFullName) {
+	public Party(int id, String partyName, String partyFullName) {
 		super();
+		this.partyId = id;
 		this.partyName = partyName;
 		this.partyFullName = partyFullName;
 	}

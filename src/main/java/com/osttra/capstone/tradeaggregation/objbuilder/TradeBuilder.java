@@ -66,34 +66,7 @@ public class TradeBuilder {
 		this.seller = body.getSeller();
 		this.buyer = body.getBuyer();
 		this.notionalAmount = body.getNotionalAmount();
-
 	}
-
-//	public TradeBuilder(Trade t, TradeUpdateBody body, PartyDao partyDao) {
-//		// tradeId,creTimeStamp,status,confirmTS
-//		t.setTradeRefNum(body.getTradeRefNum() == null ? t.getTradeRefNum() : body.getTradeRefNum());
-//		if (body.getPartyName() != null) {
-//			t.setPartyName(body.getPartyName());
-//			Party p = partyDao.getPartyByName(body.getPartyName());
-//			t.setPartyFullName(p.getPartyFullName());
-//			t.setInstitutionId(p.getInstitution().getInstitutionId());
-//		}
-//		if (body.getCounterPartyName() != null) {
-//			t.setCounterPartyName(body.getCounterPartyName());
-//			Party p = partyDao.getPartyByName(body.getCounterPartyName());
-//			t.setCounterPartyFullName(p.getPartyFullName());
-//		}
-//		t.setTradeDate(body.getTradeDate() == null ? t.getTradeDate() : body.getTradeDate());
-//		t.setEffectiveDate(body.getEffectiveDate() == null ? t.getEffectiveDate() : body.getEffectiveDate());
-//		t.setInstrumentId(body.getInstrumentId() == null ? t.getInstrumentId() : body.getInstrumentId());
-//		t.setNotionalAmount(body.getNotionalAmount() == 0 ? t.getNotionalAmount() : body.getNotionalAmount());
-//		t.setMaturityDate(body.getMaturityDate() == null ? t.getMaturityDate() : body.getMaturityDate());
-//		t.setCurrency(body.getCurrency() == null ? t.getCurrency() : body.getBuyer());
-//		t.setSeller(body.getSeller() == null ? t.getSeller() : body.getSeller());
-//		t.setBuyer(body.getBuyer() == null ? t.getBuyer() : body.getBuyer());
-//		t.setVersionTimeStamp(new Date());
-//		t.setVersion(t.getVersion() + 1);
-//	}
 
 	public TradeBuilder(Trade t, TradeUpdateBody body, PartyRepository partyDao) {
 		this.tradeSetter = new TradeConstruct();
@@ -112,7 +85,6 @@ public class TradeBuilder {
 		if (body.getCounterPartyName() != null) {
 			this.counterPartyName = body.getCounterPartyName();
 			Party p = partyDao.findByPartyName(body.getCounterPartyName());
-			// TODO party and counter party cant be same
 			this.counterPartyFullName = p.getPartyFullName();
 		} else {
 			this.counterPartyName = t.getCounterPartyName();

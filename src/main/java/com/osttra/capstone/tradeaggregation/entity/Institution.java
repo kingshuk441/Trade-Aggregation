@@ -50,8 +50,9 @@ public class Institution {
 		this.institutionName = i.getInstitutionName();
 	}
 
-	public Institution(String institutionName) {
+	public Institution(int id, String institutionName) {
 		super();
+		this.institutionId = id;
 		this.institutionName = institutionName;
 	}
 
