@@ -67,6 +67,7 @@ public class TradeServiceImpl implements TradeService {
 	}
 
 	private Trade matchingFields(Trade body) {
+		this.dataFetch();
 		for (Integer keys : this.tradeCache.keySet()) {
 			Trade t = this.tradeCache.get(keys);
 			if (t.getPartyName().equals(body.getPartyName())
@@ -91,7 +92,7 @@ public class TradeServiceImpl implements TradeService {
 		Trade matchedTrade = this.matchingFields(incomingTrade);
 		// unconf trade
 		if (matchedTrade == null) {
-			this.tradeRepository.save(incomingTrade);
+			incomingTrade = this.tradeRepository.save(incomingTrade);
 			this.tradeCache.put(incomingTrade.getTradeId(), incomingTrade);
 			return new CustomResponse<>("Trade added successfully!", HttpStatus.ACCEPTED.value(), incomingTrade);
 		} else {
@@ -112,6 +113,7 @@ public class TradeServiceImpl implements TradeService {
 	}
 
 	private Trade aggregationTrade(Trade incomingTrade, Trade matchedTrade) {
+		this.dataFetch();
 		Party party = this.partyRepository.findByPartyName(incomingTrade.getPartyName());
 		String partyFullName = party.getPartyFullName();
 		String counterPartyFullName = this.partyRepository.findByPartyName(incomingTrade.getCounterPartyName())
@@ -153,8 +155,7 @@ public class TradeServiceImpl implements TradeService {
 			newTrade.addCancelTrades(c1);
 		newTrade.addCancelTrades(c2);
 		// save the new trade in trade table
-		this.tradeRepository.save(newTrade);
-
+		newTrade = this.tradeRepository.save(newTrade);
 		// remove the matched trade from trade table
 		this.tradeRepository.deleteById(matchedTrade.getTradeId());
 		// adding prev + new cancel trades in new trade
@@ -185,7 +186,6 @@ public class TradeServiceImpl implements TradeService {
 		}
 		set.add(c2.getAggregatedTrade().getTradeId());
 		this.cancelTrns.put(c2.getTradeRefNum(), set);
-
 		return newTrade;
 
 	}
@@ -222,7 +222,7 @@ public class TradeServiceImpl implements TradeService {
 		this.dataFetch();
 		Trade matchingTrade = this.matchingFields(newTrade);
 		if (matchingTrade == null || matchingTrade.getTradeId() == newTrade.getTradeId()) {
-			this.tradeRepository.save(newTrade);
+			newTrade = this.tradeRepository.save(newTrade);
 			this.tradeCache.put(newTrade.getTradeId(), newTrade);
 			return new CustomResponse<>("trade updated successfully!", HttpStatus.ACCEPTED.value(), newTrade);
 		} else {
@@ -270,7 +270,6 @@ public class TradeServiceImpl implements TradeService {
 	@Override
 	public CustomResponse<Trade> findByTrnParty(String trn, String partyName) {
 		this.dataFetch();
-
 		// checking if trn is in cancel trade table
 		if (this.cancelTrns.containsKey(trn)) {
 			HashSet<Integer> set = this.cancelTrns.get(trn);

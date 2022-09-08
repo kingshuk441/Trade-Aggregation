@@ -104,7 +104,7 @@ public class TradeConstruct {
 	}
 
 	public void setTradeId(int tradeId) {
-		this.setTradeId(tradeId);
+		this.trade.setTradeId(tradeId);
 	}
 
 	public void setAggregatedFrom(List<CancelTrade> aggregatedFrom) {

@@ -1,9 +1,11 @@
 package com.osttra.capstone.tradeaggregation;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -117,13 +119,125 @@ public class TradeServiceTest {
 		this.allCancelTrades = new ArrayList<>();
 	}
 
-//	@Test
+	@Test
+	@DisplayName("find all trades")
+	public void Get_AllTrades_success() {
+		when(this.tradeRepository.findAll()).thenReturn(Arrays.asList(TRADE_1, TRADE_2, TRADE_3));
+		CustomResponse<Trade> act = this.tradeService.getTrades();
+		List<Trade> list = act.getData();
+		boolean res = list.size() == 3;
+		assertTrue(res);
+	}
+
+	@Test
+	@DisplayName("find trade by id")
+	public void Get_TradeById_success() {
+		when(this.tradeRepository.findById(1)).thenReturn(Optional.of(TRADE_1));
+		CustomResponse<Trade> act = this.tradeService.getTrade(1);
+		List<Trade> list = act.getData();
+		boolean res = list.size() == 1 && list.get(0).getTradeId() == 1;
+		assertTrue(res);
+	}
+
+	@Test
+	@DisplayName("find trades by party")
+	public void Get_PartyName_success() {
+		when(this.tradeRepository.findByPartyName("PNBR")).thenReturn(Arrays.asList(TRADE_1));
+		CustomResponse<Trade> act = this.tradeService.findByPartyName("PNBR");
+		List<Trade> list = act.getData();
+		boolean res = list.size() == 1 && list.get(0).getPartyName().equals("PNBR");
+		assertTrue(res);
+	}
+
+	@Test
+	@DisplayName("find trades by institution")
+	public void Get_Institution_success() {
+		when(this.institutionRepository.findByInstitutionName("PNB")).thenReturn(I_1);
+		when(this.tradeRepository.findByInstitutionId(10)).thenReturn(Arrays.asList(TRADE_1, TRADE_3));
+		CustomResponse<Trade> act = this.tradeService.findByInstitutionName("PNB");
+		List<Trade> list = act.getData();
+		boolean res = list.size() == 2;
+		assertTrue(res);
+	}
+
+	@Test
+	@DisplayName("Get Cancel Trades for Aggr trades")
+	public void Get_cancelTrades_success() {
+		boolean res = this.allCancelTrades.size() == 0;
+		this.save_AggrTrade_success();
+		res = res && this.allCancelTrades.size() == 2
+				&& this.allCancelTrades.get(0).getAggregatedTrade().getTradeRefNum().equals("#T6")
+				&& this.allCancelTrades.get(1).getAggregatedTrade().getTradeRefNum().equals("#T6");
+
+		assertTrue(res);
+	}
+
+	@Test
+	@DisplayName("find trade by TRN party unconfirm")
+	public void Get_findByTrnParty_Unconfirm_success() {
+		this.save_UnConfirmTrade_success();
+		when(this.tradeRepository.findAll()).thenReturn(allTrades);
+		when(this.cancelRepository.findAll()).thenReturn(allCancelTrades);
+		CustomResponse<Trade> act = this.tradeService.findByTrnParty("#T4", "PNBD");
+		List<Trade> list = act.getData();
+		boolean res = list.get(0).getTradeRefNum().equals("#T4") && list.get(0).getPartyName().equals("PNBD")
+				&& list.get(0).getStatus().equals("UF");
+		assertTrue(res);
+	}
+
+	@Test
+	@DisplayName("find trade by TRN party aggr")
+	public void Get_findByTrnParty_Aggr_success() {
+		this.save_AggrTrade_success();
+		when(this.tradeRepository.findAll()).thenReturn(allTrades);
+		when(this.cancelRepository.findAll()).thenReturn(allCancelTrades);
+		CustomResponse<Trade> act = this.tradeService.findByTrnParty("#T5", "PNBD");
+		List<Trade> list = act.getData();
+		boolean res = list.get(0).getTradeRefNum().equals("#T6") && list.get(0).getPartyName().equals("PNBD")
+				&& list.get(0).getStatus().equals("AGG");
+		assertTrue(res);
+	}
+
+	@Test
+	@DisplayName("find trades by TRN status UNCONFIRM")
+	public void Get_findByPartyStatus_Unconf_success() {
+		Trade newTrade = new Trade(5, "#T5", "PNBL", "PNB LADAKH", "SBITN", "SBI TAMIL NADU", LocalDate.now(),
+				LocalDate.now(), "STOCK", 3000, LocalDate.now(), "DLR", "SELLER", "BUYER", new Date(), new Date(),
+				new Date(), 0, "UF", 10);
+		when(this.tradeRepository.save(any(Trade.class))).thenReturn(newTrade);
+		when(this.partyRepository.findByPartyName("PNBL")).thenReturn(PARTY_2);
+		when(this.partyRepository.findByPartyName("SBITN")).thenReturn(PARTY_4);
+		when(this.tradeRepository.findAll()).thenReturn(allTrades);
+		when(this.cancelRepository.findAll()).thenReturn(allCancelTrades);
+		TradeBody tradeBody = new TradeBody("#T5", "PNBL", "SBITN", LocalDate.now(), LocalDate.now(), "STOCK", 3000,
+				LocalDate.now(), "INR", "SELLER", "BUYER");
+		CustomResponse<Trade> actRes = this.tradeService.addTrade(tradeBody);
+		actRes.getData();
+		CustomResponse<Trade> act = this.tradeService.findByPartyStatus("PNBL", "unconfirm");
+		List<Trade> list = act.getData();
+		boolean res = list.size() == 2;
+		assertTrue(res);
+	}
+
+	@Test
+	@DisplayName("find aggr trade by TRN status CANCEL")
+	public void Get_findByPartyStatus_cancel_success() {
+		this.save_AggrTrade_success();
+		when(this.tradeRepository.findAll()).thenReturn(allTrades);
+		when(this.cancelRepository.findAll()).thenReturn(allCancelTrades);
+		CustomResponse<Trade> act = this.tradeService.findByPartyStatus("PNBD", "cancel");
+		List<Trade> list = act.getData();
+		boolean res = list.size() == 1 && list.get(0).getTradeRefNum().equals("#T6");
+		assertTrue(res);
+	}
+
+	@Test
 	@DisplayName("Adding Unconfirm Trade")
 	public void save_UnConfirmTrade_success() {
 		Trade newTrade = new Trade(4, "#T4", "PNBD", "PNB DELHI", "ICICIK", "ICICI KOLKATA", LocalDate.now(),
 				LocalDate.now(), "STOCK", 3000, LocalDate.now(), "DLR", "SELLER", "BUYER", new Date(), new Date(),
 				new Date(), 0, "UF", 10);
-		when(this.tradeRepository.save(newTrade)).thenReturn(newTrade);
+		when(this.tradeRepository.save(any(Trade.class))).thenReturn(newTrade);
 		when(this.partyRepository.findByPartyName("PNBD")).thenReturn(PARTY_8);
 		when(this.partyRepository.findByPartyName("ICICIK")).thenReturn(PARTY_6);
 		when(this.tradeRepository.findAll()).thenReturn(allTrades);
@@ -131,7 +245,6 @@ public class TradeServiceTest {
 
 		TradeBody tradeBody = new TradeBody("#T4", "PNBD", "ICICIK", LocalDate.now(), LocalDate.now(), "BOND", 3000,
 				LocalDate.now(), "INR", "HDFCM", "SBID");
-
 		CustomResponse<Trade> actRes = this.tradeService.addTrade(tradeBody);
 		List<Trade> trade = actRes.getData();
 
@@ -140,7 +253,7 @@ public class TradeServiceTest {
 		this.allTrades.add(trade.get(0));
 	}
 
-//	@Test
+	@Test
 	@DisplayName("Adding aggregated Trade")
 	public void save_AggrTrade_success() {
 		this.save_UnConfirmTrade_success();
@@ -163,12 +276,11 @@ public class TradeServiceTest {
 		aggregatedTrade.addCancelTrades(cancelTrade1);
 		aggregatedTrade.addCancelTrades(cancelTrade2);
 
-		when(this.tradeRepository.save(aggregatedTrade)).thenReturn(aggregatedTrade);
+		when(this.tradeRepository.save(any(Trade.class))).thenReturn(aggregatedTrade);
 		when(this.partyRepository.findByPartyName("PNBD")).thenReturn(PARTY_8);
 		when(this.partyRepository.findByPartyName("ICICIK")).thenReturn(PARTY_6);
 		when(this.tradeRepository.findAll()).thenReturn(allTrades);
 		when(this.cancelRepository.findAll()).thenReturn(allCancelTrades);
-
 		TradeBody tradeBody = new TradeBody("#T5", "PNBD", "ICICIK", LocalDate.now(), LocalDate.now(), "BOND", 5000,
 				LocalDate.now(), "INR", "HDFCM", "SBID");
 
@@ -187,7 +299,7 @@ public class TradeServiceTest {
 		assertTrue(res);
 	}
 
-//	@Test
+	@Test
 	@DisplayName("Matching condition for Trade")
 	public void save_AggrTrade_failure() {
 		this.save_UnConfirmTrade_success();
@@ -195,7 +307,7 @@ public class TradeServiceTest {
 				LocalDate.now(), "STOCK", 5000, LocalDate.now(), "DLR", "SELLER", "BUYER", new Date(), new Date(),
 				new Date(), 0, "UF", 10);
 
-		when(this.tradeRepository.save(newTrade2)).thenReturn(newTrade2);
+		when(this.tradeRepository.save(any(Trade.class))).thenReturn(newTrade2);
 		when(this.partyRepository.findByPartyName("PNBD")).thenReturn(PARTY_8);
 		when(this.partyRepository.findByPartyName("ICICIK")).thenReturn(PARTY_6);
 		when(this.partyRepository.findByPartyName("PNBR")).thenReturn(PARTY_1);
@@ -212,30 +324,17 @@ public class TradeServiceTest {
 				&& trade.get(0).getTradeRefNum().equals(newTrade2.getTradeRefNum()) && this.allTrades.size() == 4);
 	}
 
-//	@Test
-	@DisplayName("Get Cancel Trades for Aggr trades")
-	public void get_cancelTrades_success() {
-		boolean res = this.allCancelTrades.size() == 0;
-		this.save_AggrTrade_success();
-		res = res && this.allCancelTrades.size() == 2
-				&& this.allCancelTrades.get(0).getAggregatedTrade().getTradeRefNum().equals("#T6")
-				&& this.allCancelTrades.get(1).getAggregatedTrade().getTradeRefNum().equals("#T6");
-
-		assertTrue(res);
-	}
-
 	@Test
-	@DisplayName("Update unconf Trade")
+	@DisplayName("Update unconf Trade (non matching field)")
 	public void update_UnconfirmTrades_success() {
 		this.save_UnConfirmTrade_success();
-		System.out.println(this.allTrades.get(this.allTrades.size() - 1));
 		LocalDate updatedDate = LocalDate.now();
 		Trade updatedTrade = new Trade(4, "#T4", "PNBD", "PNB DELHI", "ICICIK", "ICICI KOLKATA", LocalDate.now(),
 				LocalDate.now(), "BOND", 3000, updatedDate, "DLR", "SELLER", "BUYER", new Date(), new Date(),
 				new Date(), 1, "UF", 10);
 
 		Trade prev = this.allTrades.get(this.allTrades.size() - 1);
-		when(this.tradeRepository.save(updatedTrade)).thenReturn(updatedTrade);
+		when(this.tradeRepository.save(any(Trade.class))).thenReturn(updatedTrade);
 		when(this.partyRepository.findByPartyName("PNBD")).thenReturn(PARTY_8);
 		when(this.partyRepository.findByPartyName("ICICIK")).thenReturn(PARTY_6);
 		when(this.tradeRepository.findById(0)).thenReturn(Optional.of(prev));
@@ -248,7 +347,6 @@ public class TradeServiceTest {
 				prev.getConfirmationTimeStamp(), prev.getVersion(), prev.getInstitutionId());
 		CustomResponse<Trade> act = this.tradeService.updateTrade(0, body);
 		List<Trade> list = act.getData();
-
 		boolean res = list.get(0).getVersion() == 1 && updatedDate.equals(list.get(0).getMaturityDate())
 				&& list.get(0).getVersionTimeStamp().compareTo(body.getVersionTimeStamp()) > 0;
 		assertTrue(res);
@@ -257,45 +355,105 @@ public class TradeServiceTest {
 	@Test
 	@DisplayName("Update agr Trade")
 	public void update_aggrTrades_success() {
-
-		Trade aggregatedTrade = new Trade(6, "#T6", "PNBD", "PNB DELHI", "ICICIK", "ICICI KOLKATA", LocalDate.now(),
+		Trade aggregatedTrade = new Trade(6, "#T6", "PNBL", "PNB LADAKH", "ICICIK", "ICICI KOLKATA", LocalDate.now(),
 				LocalDate.now(), "STOCK", 8000, LocalDate.now(), "DLR", "SELLER", "BUYER", new Date(), new Date(),
 				new Date(), 1, "AGG", 10);
+		CancelTrade cancelTrade1 = new CancelTrade(1, 3000, TRADE_1.getCreationTimeStamp(),
+				TRADE_1.getVersionTimeStamp(), TRADE_1.getConfirmationTimeStamp(), aggregatedTrade,
+				TRADE_1.getTradeRefNum());
+		CancelTrade cancelTrade2 = new CancelTrade(2, 5000, TRADE_3.getCreationTimeStamp(),
+				TRADE_3.getVersionTimeStamp(), TRADE_3.getConfirmationTimeStamp(), aggregatedTrade,
+				TRADE_3.getTradeRefNum());
+		aggregatedTrade.addCancelTrades(cancelTrade1);
+		aggregatedTrade.addCancelTrades(cancelTrade2);
+		this.allCancelTrades.add(cancelTrade1);
+		this.allCancelTrades.add(cancelTrade2);
 
-		Trade prev = TRADE_1;
-
-//		when(this.tradeRepository.save(aggregatedTrade)).thenReturn(aggregatedTrade);
-		when(this.partyRepository.findByPartyName("PNBD")).thenReturn(PARTY_8);
+		when(this.tradeRepository.save(any(Trade.class))).thenReturn(aggregatedTrade);
+		when(this.partyRepository.findByPartyName("PNBR")).thenReturn(PARTY_1);
 		when(this.partyRepository.findByPartyName("PNBL")).thenReturn(PARTY_2);
 		when(this.partyRepository.findByPartyName("SBITN")).thenReturn(PARTY_4);
+		when(this.partyRepository.findByPartyName("PNBD")).thenReturn(PARTY_8);
 		when(this.partyRepository.findByPartyName("ICICIK")).thenReturn(PARTY_6);
-		when(this.tradeRepository.findById(1)).thenReturn(Optional.of(prev));
+		when(this.tradeRepository.findById(1)).thenReturn(Optional.of(TRADE_1));
+		when(this.tradeRepository.findById(6)).thenReturn(Optional.of(aggregatedTrade));
 		when(this.tradeRepository.findAll()).thenReturn(allTrades);
 		when(this.cancelRepository.findAll()).thenReturn(allCancelTrades);
 
-		TradeUpdateBody body = new TradeUpdateBody("#T4", "PNBL", "ICICIK", prev.getTradeDate(),
-				prev.getEffectiveDate(), prev.getInstrumentId(), prev.getNotionalAmount(), prev.getMaturityDate(),
-				prev.getCurrency(), prev.getSeller(), prev.getBuyer(), prev.getVersionTimeStamp(),
-				prev.getConfirmationTimeStamp(), prev.getVersion(), prev.getInstitutionId());
+		TradeUpdateBody body = new TradeUpdateBody("#T4", "PNBL", "ICICIK", TRADE_1.getTradeDate(),
+				TRADE_1.getEffectiveDate(), TRADE_1.getInstrumentId(), TRADE_1.getNotionalAmount(),
+				TRADE_1.getMaturityDate(), TRADE_1.getCurrency(), TRADE_1.getSeller(), TRADE_1.getBuyer(),
+				TRADE_1.getVersionTimeStamp(), TRADE_1.getConfirmationTimeStamp(), TRADE_1.getVersion(),
+				TRADE_1.getInstitutionId());
 
 		CustomResponse<Trade> act = this.tradeService.updateTrade(1, body);
 		List<Trade> list = act.getData();
+		List<CancelTrade> cancelTrades = this.tradeService.getCancelTrades(6).getData();
+
 		boolean res = list.get(0).getVersion() == 1 && list.get(0).getStatus().equals("AGG")
-				&& list.get(0).getAggregatedFrom().size() == 2 && list.get(0).getNotionalAmount() == 8000;
+				&& list.get(0).getAggregatedFrom().size() == 2 && list.get(0).getPartyFullName().equals("PNB LADAKH")
+				&& list.get(0).getCounterPartyFullName().equals("ICICI KOLKATA")
+				&& list.get(0).getNotionalAmount() == 8000 && cancelTrades.size() == 2;
 		assertTrue(res);
 	}
 
 	@Test
-	public void whenDelete_thenObjectShouldBeDeleted() {
+	@DisplayName("Delete a unconf Trade")
+	public void Delete_UnconfirmTrade_success() {
 		when(this.tradeRepository.findById(1)).thenReturn(Optional.of(TRADE_1));
 		when(this.tradeRepository.findAll()).thenReturn(allTrades);
 		when(this.cancelRepository.findAll()).thenReturn(allCancelTrades);
 
-		CustomResponse<Trade> res = this.tradeService.deleteTrade(1);
-		List<Trade> list = res.getData();
+		this.tradeService.deleteTrade(1);
 
 		Mockito.verify(this.tradeRepository, times(1)).deleteById(1);
+	}
 
+	@Test
+	@DisplayName("Matching fields")
+	public void matchingFields() throws NoSuchMethodException, SecurityException, IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException {
+		when(this.tradeRepository.findAll()).thenReturn(allTrades);
+		when(this.cancelRepository.findAll()).thenReturn(allCancelTrades);
+		java.lang.reflect.Method method = TradeServiceImpl.class.getDeclaredMethod("matchingFields", Trade.class);
+		method.setAccessible(true);
+		Trade matchedTrade = (Trade) method.invoke(this.tradeService, TRADE_1);
+		assertTrue(matchedTrade == TRADE_1);
+	}
+
+	@Test
+	@DisplayName("Aggregation Logic")
+	public void AggregationLogic() throws NoSuchMethodException, SecurityException, IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException {
+		when(this.tradeRepository.findAll()).thenReturn(allTrades);
+		when(this.cancelRepository.findAll()).thenReturn(allCancelTrades);
+		Trade newTrade1 = new Trade(5, "#T5", "PNBR", "PNB RAIPUR", "SBITN", "SBITN TAMIL NADU", LocalDate.now(),
+				LocalDate.now(), "STOCK", 1000, LocalDate.now(), "DLR", "SELLER", "BUYER", new Date(), new Date(),
+				new Date(), 0, "UF", 10);
+
+		Trade aggregatedTrade = new Trade(6, "#T6", "PNBR", "PNB RAIPUR", "SBITN", "SBITN TAMIL NADU", LocalDate.now(),
+				LocalDate.now(), "STOCK", 6000, LocalDate.now(), "DLR", "SELLER", "BUYER", new Date(), new Date(),
+				new Date(), 1, "AGG", 10);
+		CancelTrade cancelTrade1 = new CancelTrade(1, 5000, newTrade1.getCreationTimeStamp(),
+				newTrade1.getVersionTimeStamp(), newTrade1.getConfirmationTimeStamp(), aggregatedTrade,
+				newTrade1.getTradeRefNum());
+
+		CancelTrade cancelTrade2 = new CancelTrade(2, 1000, newTrade1.getCreationTimeStamp(),
+				newTrade1.getVersionTimeStamp(), newTrade1.getConfirmationTimeStamp(), aggregatedTrade,
+				newTrade1.getTradeRefNum());
+		aggregatedTrade.addCancelTrades(cancelTrade1);
+		aggregatedTrade.addCancelTrades(cancelTrade2);
+		when(this.tradeRepository.save(any(Trade.class))).thenReturn(aggregatedTrade);
+		when(this.partyRepository.findByPartyName("PNBR")).thenReturn(PARTY_1);
+		when(this.partyRepository.findByPartyName("SBITN")).thenReturn(PARTY_4);
+		when(this.tradeRepository.findAll()).thenReturn(allTrades);
+		when(this.cancelRepository.findAll()).thenReturn(allCancelTrades);
+		java.lang.reflect.Method method = TradeServiceImpl.class.getDeclaredMethod("aggregationTrade", Trade.class,
+				Trade.class);
+		method.setAccessible(true);
+		Trade aggTrade = (Trade) method.invoke(this.tradeService, TRADE_1, newTrade1);
+		assertTrue(aggTrade.getAggregatedFrom().size() == 2
+				&& aggTrade.getNotionalAmount() == aggTrade.getNotionalAmount());
 	}
 
 }
