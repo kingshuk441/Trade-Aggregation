@@ -20,13 +20,6 @@ public class CancelTradeServiceImpl implements CancelTradeService {
 	private CancelRepository cancelRepository;
 
 	@Override
-	public CustomResponse<CancelTrade> addCancelTrade(CancelTrade cancel) {
-		CancelTrade c = this.cancelRepository.save(cancel);
-		return new CustomResponse<>("cancel trades added successfully!", HttpStatus.ACCEPTED.value(), c);
-
-	}
-
-	@Override
 	public CustomResponse<CancelTrade> getCancelTrades() {
 		List<CancelTrade> list = this.cancelRepository.findAll();
 		return new CustomResponse<>("all cancel trades fetched successfully!", HttpStatus.ACCEPTED.value(), list);

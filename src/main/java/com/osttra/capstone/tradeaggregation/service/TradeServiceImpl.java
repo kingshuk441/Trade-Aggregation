@@ -147,9 +147,9 @@ public class TradeServiceImpl implements TradeService {
 				newAggrList.add(c);
 			}
 		}
-		this.tradeRepository.save(newTrade);
+		newTrade = this.tradeRepository.save(newTrade);
 		newTrade.setAggregatedFrom(newAggrList);
-		this.tradeRepository.save(newTrade);
+		newTrade = this.tradeRepository.save(newTrade);
 		// adding cancel trades in cancel table due to cascading
 		if (c1 != null)
 			newTrade.addCancelTrades(c1);

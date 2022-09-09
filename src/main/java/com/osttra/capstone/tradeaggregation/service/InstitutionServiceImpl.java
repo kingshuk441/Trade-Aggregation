@@ -52,10 +52,10 @@ public class InstitutionServiceImpl implements InstitutionService {
 		return new CustomResponse<>("parties fetched successfully!", HttpStatus.ACCEPTED.value(), allParties);
 	}
 
-	public Institution addParty(int instiId, Party partyToAdd) {
+	private Institution addParty(int instiId, Party partyToAdd) {
 
 		Optional<Institution> institution = this.institutionRepository.findById(instiId);
-		if(institution.isEmpty()){
+		if (institution.isEmpty()) {
 			throw new NotFoundException("Institution with id " + instiId + " not found!");
 		}
 		for (Party party : institution.get().getAllParties()) {
@@ -79,7 +79,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 		if (institution == null) {
 			throw new RuntimeException("already added!");
 		}
-		this.institutionRepository.save(institution);
+		institution = this.institutionRepository.save(institution);
 		return new CustomResponse<>("party added successfully!", HttpStatus.ACCEPTED.value(), institution);
 
 	}
@@ -96,8 +96,8 @@ public class InstitutionServiceImpl implements InstitutionService {
 				if (set.contains(partyId) == false) {
 					set.add(partyId);
 					Optional<Party> party = this.partyRepository.findById(partyId);
-					if(party.isEmpty() == false)
-					institution.addParty(party.get());
+					if (party.isEmpty() == false)
+						institution.addParty(party.get());
 				}
 			}
 		}
@@ -140,9 +140,10 @@ public class InstitutionServiceImpl implements InstitutionService {
 			List<Party> addParties = new ArrayList<>();
 			for (int partyId : body.getParties()) {
 				Optional<Party> party = this.partyRepository.findById(partyId);
-				if(party.isEmpty()==false)
-				addParties.add(party.get());
-				alreadyPresent.add(partyId);
+				if (party.isEmpty() == false) {
+					addParties.add(party.get());
+					alreadyPresent.add(partyId);
+				}
 			}
 			for (Party party : institution.get().getAllParties()) {
 				if (alreadyPresent.contains(party.getPartyId()) == false) {
@@ -183,7 +184,8 @@ public class InstitutionServiceImpl implements InstitutionService {
 				allParties.set(j, partyAtLastIndex);
 				allParties.remove(allParties.size() - 1);
 				Institution updatedInstitution = this.institutionRepository.save(institution.get());
-				return new CustomResponse<>("Party deleted successfully!", HttpStatus.ACCEPTED.value(),updatedInstitution);
+				return new CustomResponse<>("Party deleted successfully!", HttpStatus.ACCEPTED.value(),
+						updatedInstitution);
 			}
 		}
 		throw new NotFoundException("Party with id " + partyId + " not found!");

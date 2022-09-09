@@ -5,8 +5,6 @@ import com.osttra.capstone.tradeaggregation.entity.CustomResponse;
 import com.osttra.capstone.tradeaggregation.entity.Trade;
 
 public interface CancelTradeService {
-	public CustomResponse<CancelTrade> addCancelTrade(CancelTrade cancel);
-
 	public CustomResponse<CancelTrade> getCancelTrades();
 
 	public CustomResponse<CancelTrade> getCancelTrade(int id);
