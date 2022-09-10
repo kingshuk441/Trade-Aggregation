@@ -73,11 +73,15 @@ public class InstitutionServiceImpl implements InstitutionService {
 	public CustomResponse<Institution> addParty(int instiId, int partyId) {
 		Optional<Party> party = this.partyRepository.findById(partyId);
 		if (party.isEmpty()) {
-			throw new NotFoundException("party with id " + instiId + " not found!");
+			throw new NotFoundException("party with id " + partyId + " not found!");
+		}
+		Optional<Institution> inst = this.institutionRepository.findById(instiId);
+		if (inst.isEmpty()) {
+			throw new NotFoundException("institution with id " + instiId + " not found!");
 		}
 		Institution institution = this.addParty(instiId, party.get());
 		if (institution == null) {
-			throw new RuntimeException("already added!");
+			throw new FoundException("party was already added!");
 		}
 		institution = this.institutionRepository.save(institution);
 		return new CustomResponse<>("party added successfully!", HttpStatus.ACCEPTED.value(), institution);

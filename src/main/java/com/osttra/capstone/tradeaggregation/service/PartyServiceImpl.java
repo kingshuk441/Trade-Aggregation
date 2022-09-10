@@ -31,20 +31,20 @@ public class PartyServiceImpl implements PartyService {
 
 	@Override
 	public CustomResponse<Party> getParty(int partyId) {
-		Party party = this.partyRepository.findById(partyId).get();
-		if (party == null) {
+		Optional<Party> party = this.partyRepository.findById(partyId);
+		if (party.isEmpty()) {
 			throw new NotFoundException("party with id " + partyId + " not found!");
 		}
-		return new CustomResponse<>("party fetched successfully!", HttpStatus.ACCEPTED.value(), party);
+		return new CustomResponse<>("party fetched successfully!", HttpStatus.ACCEPTED.value(), party.get());
 	}
 
 	@Override
 	public CustomResponse<Institution> getInstitution(int partyId) {
-		Party party = this.partyRepository.findById(partyId).get();
-		if (party == null) {
+		Optional<Party> party = this.partyRepository.findById(partyId);
+		if (party.isEmpty()) {
 			throw new NotFoundException("party with id " + partyId + " not found!");
 		}
-		Institution institution = party.getInstitution();
+		Institution institution = party.get().getInstitution();
 		return new CustomResponse<>("Institution fetched successfully!", HttpStatus.ACCEPTED.value(), institution);
 	}
 
@@ -99,11 +99,11 @@ public class PartyServiceImpl implements PartyService {
 		String partyFullName = partyDetails.getPartyFullName();
 
 		if (institutionId != 0 && party.get().getInstitution() == null) {
-			Institution i = this.institutionRepository.findById(institutionId).get();
-			if (i == null) {
+			Optional<Institution> i = this.institutionRepository.findById(institutionId);
+			if (i.isEmpty()) {
 				throw new NotFoundException("Institution with id " + partyId + " not found!");
 			}
-			party.get().setInstitution(i);
+			party.get().setInstitution(i.get());
 		}
 		if (name != null) {
 			party.get().setPartyName(name);

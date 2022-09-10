@@ -176,8 +176,7 @@ class InstitutionServiceTest {
 
 		CustomResponse<Institution> act = this.institutionservice.updateInstitution(10, institutionBody);
 		List<Institution> list = act.getData();
-		boolean res = list.get(0).getAllParties().size() == 5 &&
-				list.get(0).getInstitutionName().equals("CHANGED");
+		boolean res = list.get(0).getAllParties().size() == 5 && list.get(0).getInstitutionName().equals("CHANGED");
 		assertTrue(res);
 	}
 
@@ -194,7 +193,7 @@ class InstitutionServiceTest {
 	public void Delete_PartyFromInstitution_success() {
 		when(this.institutionrepository.findById(10)).thenReturn(Optional.of(I_1));
 		when(this.institutionrepository.save(any(Institution.class))).thenReturn(I_1);
-		CustomResponse<Institution>act = this.institutionservice.removeParty(10, 1);
+		CustomResponse<Institution> act = this.institutionservice.removeParty(10, 1);
 		List<Institution> list = act.getData();
 		boolean res = list.get(0).getAllParties().size() == 3;
 		assertTrue(res);

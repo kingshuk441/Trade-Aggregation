@@ -25,7 +25,6 @@ public class PartySameValidator implements ConstraintValidator<PartySame, String
 			def = null;
 			return true;
 		}
-
 		Party p = this.partyRepository.findByPartyName(value);
 		if (p == null) {
 			def = null;

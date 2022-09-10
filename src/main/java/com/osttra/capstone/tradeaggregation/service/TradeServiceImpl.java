@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.osttra.capstone.tradeaggregation.customexception.FoundException;
 import com.osttra.capstone.tradeaggregation.customexception.NotFoundException;
@@ -44,6 +45,7 @@ public class TradeServiceImpl implements TradeService {
 	private boolean isFirstFetch;
 
 	// one time fetching from trade and cancel table
+	@Transactional
 	private void dataFetch() {
 		if (this.isFirstFetch == false) {
 			this.isFirstFetch = true;
@@ -66,6 +68,7 @@ public class TradeServiceImpl implements TradeService {
 		}
 	}
 
+	@Transactional
 	private Trade matchingFields(Trade body) {
 		this.dataFetch();
 		for (Integer keys : this.tradeCache.keySet()) {
@@ -79,6 +82,7 @@ public class TradeServiceImpl implements TradeService {
 	}
 
 	@Override
+	@Transactional
 	public CustomResponse<Trade> addTrade(TradeBody body) {
 		this.dataFetch();
 		Party party = this.partyRepository.findByPartyName(body.getPartyName());
@@ -103,6 +107,7 @@ public class TradeServiceImpl implements TradeService {
 	}
 
 	@Override
+	@Transactional
 	public CustomResponse<CancelTrade> getCancelTrades(int tradeId) {
 		Optional<Trade> trade = this.tradeRepository.findById(tradeId);
 		if (trade.isEmpty()) {
@@ -112,6 +117,7 @@ public class TradeServiceImpl implements TradeService {
 				trade.get().getAggregatedFrom());
 	}
 
+	@Transactional
 	private Trade aggregationTrade(Trade incomingTrade, Trade matchedTrade) {
 		this.dataFetch();
 		Party party = this.partyRepository.findByPartyName(incomingTrade.getPartyName());
@@ -191,6 +197,7 @@ public class TradeServiceImpl implements TradeService {
 	}
 
 	@Override
+	@Transactional
 	public CustomResponse<Trade> updateTrade(int tradeId, TradeUpdateBody body) {
 		Optional<Trade> trade = this.tradeRepository.findById(tradeId);
 		if (trade.isEmpty()) {
@@ -235,12 +242,14 @@ public class TradeServiceImpl implements TradeService {
 	}
 
 	@Override
+	@Transactional
 	public CustomResponse<Trade> findByPartyName(String partyName) {
 		List<Trade> allTrades = this.tradeRepository.findByPartyName(partyName);
 		return new CustomResponse<>("all trades fetched successfully!", HttpStatus.ACCEPTED.value(), allTrades);
 
 	}
 
+	@Transactional
 	@Override
 	public CustomResponse<Trade> findByInstitutionName(String institutionName) {
 		Institution institution = this.institutionRepository.findByInstitutionName(institutionName);
@@ -253,12 +262,14 @@ public class TradeServiceImpl implements TradeService {
 	}
 
 	@Override
+	@Transactional
 	public CustomResponse<Trade> getTrades() {
 		List<Trade> allTrades = this.tradeRepository.findAll();
 		return new CustomResponse<>("All Trades fetched successfully!", HttpStatus.ACCEPTED.value(), allTrades);
 	}
 
 	@Override
+	@Transactional
 	public CustomResponse<Trade> getTrade(int tradeId) {
 		Optional<Trade> trade = this.tradeRepository.findById(tradeId);
 		if (trade.isEmpty()) {
@@ -268,6 +279,7 @@ public class TradeServiceImpl implements TradeService {
 	}
 
 	@Override
+	@Transactional
 	public CustomResponse<Trade> findByTrnParty(String trn, String partyName) {
 		this.dataFetch();
 		// checking if trn is in cancel trade table
@@ -297,6 +309,7 @@ public class TradeServiceImpl implements TradeService {
 	}
 
 	@Override
+	@Transactional
 	public CustomResponse<Trade> findByPartyStatus(String partyName, String status) {
 		this.dataFetch();
 		if (status.toLowerCase().equals("cancel")) {
@@ -322,6 +335,7 @@ public class TradeServiceImpl implements TradeService {
 	}
 
 	@Override
+	@Transactional
 	public CustomResponse<Trade> deleteTrade(int tradeId) {
 		this.dataFetch();
 		Optional<Trade> trade = this.tradeRepository.findById(tradeId);

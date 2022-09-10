@@ -5,8 +5,7 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.osttra.capstone.tradeaggregation.entity.CustomResponse;
-import com.osttra.capstone.tradeaggregation.entity.Trade;
+import com.osttra.capstone.tradeaggregation.customexception.NotFoundException;
 import com.osttra.capstone.tradeaggregation.service.TradeService;
 
 public class UniqueTrnValidator implements ConstraintValidator<UniqueTrn, String> {
@@ -28,8 +27,10 @@ public class UniqueTrnValidator implements ConstraintValidator<UniqueTrn, String
 			prevTrn = value;
 			return true;
 		} else {
-			CustomResponse<Trade> c = this.tradeService.findByTrnParty(prevTrn, value);
-			if (c.getData() == null) {
+			try {
+				this.tradeService.findByTrnParty(prevTrn, value);
+			} catch (NotFoundException e) {
+
 				prevTrn = null;
 				return true;
 			}

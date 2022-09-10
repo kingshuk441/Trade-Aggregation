@@ -16,8 +16,10 @@ public class ValidDateValidator implements ConstraintValidator<ValidDate, LocalD
 	public boolean isValid(LocalDate value, ConstraintValidatorContext context) {
 		if (value == null)
 			return true;
-		if (value.compareTo(LocalDate.now()) < 0)
+
+		if (value.compareTo(LocalDate.now()) < 0) {
 			return false;
+		}
 
 		return true;
 	}
