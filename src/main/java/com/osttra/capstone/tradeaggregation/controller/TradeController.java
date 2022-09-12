@@ -125,4 +125,22 @@ public class TradeController {
 		return this.tradeService.deleteTrade(id);
 	}
 
+	@ApiOperation(value = "Get all aggregated trades")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
+	@GetMapping("/trades/aggregated")
+	public CustomResponse<Trade> getAllAggregatedTrades() {
+		return this.tradeService.getAllAggregatedTrades();
+	}
+
+	@ApiOperation(value = "Get all unconfirmed trades")
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully Retrived List"),
+			@ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+			@ApiResponse(code = 403, message = "Accessing the resource you where trying to reach is forbidden") })
+	@GetMapping("/trades/unconfirmed")
+	public CustomResponse<Trade> getAllUnconfirmedTrades() {
+		return this.tradeService.getAllUnconfirmedTrades();
+	}
+
 }

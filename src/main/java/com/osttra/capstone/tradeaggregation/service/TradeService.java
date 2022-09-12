@@ -26,4 +26,8 @@ public interface TradeService {
 	CustomResponse<Trade> findByPartyStatus(String partyName, String status);
 
 	public CustomResponse<Trade> deleteTrade(int id);
+
+	CustomResponse<Trade> getAllAggregatedTrades();
+
+	CustomResponse<Trade> getAllUnconfirmedTrades();
 }

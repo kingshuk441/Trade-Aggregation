@@ -74,7 +74,13 @@ public class TradeServiceImpl implements TradeService {
 		for (Integer keys : this.tradeCache.keySet()) {
 			Trade t = this.tradeCache.get(keys);
 			if (t.getPartyName().equals(body.getPartyName())
-					&& t.getCounterPartyName().equals(body.getCounterPartyName())) {
+					&& t.getCounterPartyName().equals(body.getCounterPartyName())
+					&& (t.getTradeDate().equals(body.getTradeDate()))
+					&& (t.getEffectiveDate().equals(body.getEffectiveDate()))
+					&& (t.getInstrumentId().equals(body.getInstrumentId()))
+					&& (t.getMaturityDate().equals(body.getMaturityDate()))
+					&& (t.getCurrency().equals(body.getCurrency())) && (t.getSeller().equals(body.getSeller()))
+					&& (t.getBuyer().equals(body.getBuyer()))) {
 				return t;
 			}
 		}
@@ -352,6 +358,36 @@ public class TradeServiceImpl implements TradeService {
 		this.tradeRepository.deleteById(tradeId);
 
 		return new CustomResponse<>("Trade deleted successfully!", HttpStatus.ACCEPTED.value(), trade.get());
+	}
+
+	@Override
+	@Transactional
+	public CustomResponse<Trade> getAllAggregatedTrades() {
+		this.dataFetch();
+		List<Trade> allTrades = new ArrayList<>();
+		for (int keys : this.tradeCache.keySet()) {
+			Trade t = this.tradeCache.get(keys);
+			if (t.getStatus().equals("AGG") == true) {
+				allTrades.add(t);
+			}
+		}
+		return new CustomResponse<>("All Aggregated Trade fetched successfully!", HttpStatus.ACCEPTED.value(),
+				allTrades);
+	}
+
+	@Override
+	@Transactional
+	public CustomResponse<Trade> getAllUnconfirmedTrades() {
+		this.dataFetch();
+		List<Trade> allTrades = new ArrayList<>();
+		for (int keys : this.tradeCache.keySet()) {
+			Trade t = this.tradeCache.get(keys);
+			if (t.getStatus().equals("AGG") == false) {
+				allTrades.add(t);
+			}
+		}
+		return new CustomResponse<>("All Unconfirmed Trade fetched successfully!", HttpStatus.ACCEPTED.value(),
+				allTrades);
 	}
 
 }
