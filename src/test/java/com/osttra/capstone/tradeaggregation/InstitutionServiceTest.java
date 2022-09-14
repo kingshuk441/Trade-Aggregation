@@ -114,9 +114,9 @@ class InstitutionServiceTest {
 	@DisplayName("find all parties of institution")
 	public void Get_Allparties_success() {
 		when(this.institutionrepository.findById(10)).thenReturn(Optional.of(I_1));
-		CustomResponse<Institution> act = this.institutionservice.getInstitution(10);
-		List<Institution> list = act.getData();
-		boolean res = list.size() == 1 && list.get(0).getAllParties().size() == 4;
+		CustomResponse<Party> act = this.institutionservice.getParties(10);
+		List<Party> list = act.getData();
+		boolean res = list.size() == 4;
 		assertTrue(res);
 	}
 

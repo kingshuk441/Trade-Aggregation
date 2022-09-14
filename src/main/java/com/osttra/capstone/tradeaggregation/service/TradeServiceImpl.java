@@ -318,7 +318,7 @@ public class TradeServiceImpl implements TradeService {
 	@Transactional
 	public CustomResponse<Trade> findByPartyStatus(String partyName, String status) {
 		this.dataFetch();
-		if (status.toLowerCase().equals("cancel")) {
+		if (status.toLowerCase().equals("cancel") ||status.toLowerCase().equals("agg") ) {
 			List<Trade> allTrades = new ArrayList<>();
 			for (int keys : this.tradeCache.keySet()) {
 				Trade t = this.tradeCache.get(keys);
@@ -335,7 +335,8 @@ public class TradeServiceImpl implements TradeService {
 					allTrades.add(t);
 				}
 			}
-			return new CustomResponse<>("Trade fetched successfully!", HttpStatus.ACCEPTED.value(), allTrades);
+			return new CustomResponse<>("unconfirmed Trade fetched successfully!", HttpStatus.ACCEPTED.value(),
+					allTrades);
 		}
 		throw new NotFoundException("trade with partyName " + partyName + " and status " + status + " not found!");
 	}

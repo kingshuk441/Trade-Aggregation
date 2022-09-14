@@ -55,9 +55,6 @@ public class InstitutionServiceImpl implements InstitutionService {
 	private Institution addParty(int instiId, Party partyToAdd) {
 
 		Optional<Institution> institution = this.institutionRepository.findById(instiId);
-		if (institution.isEmpty()) {
-			throw new NotFoundException("Institution with id " + instiId + " not found!");
-		}
 		for (Party party : institution.get().getAllParties()) {
 			if (party.getPartyId() == partyToAdd.getPartyId()) {
 				return null;

@@ -1,6 +1,7 @@
 package com.osttra.capstone.tradeaggregation;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
@@ -64,14 +65,15 @@ public class ServiceNegativeTest {
 
 	Trade TRADE_1 = new Trade(1, "#T1", "PNBR", "PNB RAIPUR", "SBITN", "SBI TAMIL NADU", LocalDate.now(),
 			LocalDate.now(), "BOND", 5000, LocalDate.now(), "INR", "SELLER", "BUYER", new Date(), new Date(),
-			new Date(), 1, "UF", 10);
+			new Date(), 1, "UF", null, 10);
 
 	Trade TRADE_2 = new Trade(2, "#T2", "HDFCG", "HDFC GOA", "SBIGT", "SBI GUJARAT", LocalDate.now(), LocalDate.now(),
-			"MF", 2000, LocalDate.now(), "INR", "SELLER", "BUYER", new Date(), new Date(), new Date(), 1, "UF", 13);
+			"MF", 2000, LocalDate.now(), "INR", "SELLER", "BUYER", new Date(), new Date(), new Date(), 1, "UF", null,
+			13);
 
 	Trade TRADE_3 = new Trade(3, "#T3", "PNBL", "PNB LADAKH", "ICICIK", "ICICI KOLKATA", LocalDate.now(),
 			LocalDate.now(), "STOCK", 3000, LocalDate.now(), "DLR", "SELLER", "BUYER", new Date(), new Date(),
-			new Date(), 1, "UF", 10);
+			new Date(), 1, "UF", null, 10);
 
 	Party PARTY_1 = new Party(1, "PNBR", "PNB RAIPUR");
 	Party PARTY_2 = new Party(2, "PNBL", "PNB LADAKH");
@@ -79,8 +81,9 @@ public class ServiceNegativeTest {
 	Party PARTY_4 = new Party(4, "SBITN", "SBI TAMIL NADU");
 	Party PARTY_5 = new Party(5, "SBIGT", "SBI GUJARAT");
 	Party PARTY_6 = new Party(6, "ICICIK", "ICICI KOLKATA");
-	Party PARTY_7 = new Party(7, "HDFCG", "HDFCG");
+	Party PARTY_7 = new Party(7, "HDFCG", "HDFC GOA");
 	Party PARTY_8 = new Party(8, "PNBD", "PNB DELHI");
+	Party PARTY_9 = new Party(8, "BOBJ", "BOB JAIPUR");
 
 	Institution I_1 = new Institution(10, "PNB");
 	Institution I_2 = new Institution(11, "ICICI");
@@ -118,8 +121,37 @@ public class ServiceNegativeTest {
 	}
 
 	@Test
-	@DisplayName("update trade same institution")
-	public void update_sameInstitution_failure() {
+	@DisplayName("update trade same institution counterparty")
+	public void update_sameInstitution_counterParty_failure() {
+		when(this.partyRepository.findByPartyName("PNBR")).thenReturn(PARTY_1);
+		when(this.partyRepository.findByPartyName("PNBL")).thenReturn(PARTY_2);
+		when(this.partyRepository.findByPartyName("SBIGT")).thenReturn(PARTY_5);
+		when(this.partyRepository.findByPartyName("SBITN")).thenReturn(PARTY_4);
+		when(this.partyRepository.findByPartyName("PNBD")).thenReturn(PARTY_8);
+		when(this.partyRepository.findByPartyName("ICICIK")).thenReturn(PARTY_6);
+		when(this.tradeRepository.findById(1)).thenReturn(Optional.of(TRADE_1));
+		when(this.tradeRepository.findAll()).thenReturn(allTrades);
+		when(this.cancelRepository.findAll()).thenReturn(allCancelTrades);
+
+		TradeUpdateBody body = new TradeUpdateBody("#T4", "SBIGT", null, TRADE_1.getTradeDate(),
+				TRADE_1.getEffectiveDate(), TRADE_1.getInstrumentId(), TRADE_1.getNotionalAmount(),
+				TRADE_1.getMaturityDate(), TRADE_1.getCurrency(), TRADE_1.getSeller(), TRADE_1.getBuyer(),
+				TRADE_1.getVersionTimeStamp(), TRADE_1.getConfirmationTimeStamp(), TRADE_1.getVersion(),
+				TRADE_1.getInstitutionId());
+
+		try {
+			this.tradeService.updateTrade(1, body);
+		} catch (FoundException e) {
+			assertTrue(true);
+		} catch (Exception e) {
+			assertTrue(false);
+		}
+
+	}
+
+	@Test
+	@DisplayName("update trade same institution party")
+	public void update_sameInstitution_Party_failure() {
 		when(this.partyRepository.findByPartyName("PNBR")).thenReturn(PARTY_1);
 		when(this.partyRepository.findByPartyName("PNBL")).thenReturn(PARTY_2);
 		when(this.partyRepository.findByPartyName("SBITN")).thenReturn(PARTY_4);
@@ -163,7 +195,7 @@ public class ServiceNegativeTest {
 
 		when(this.tradeRepository.findById(100)).thenReturn(Optional.empty());
 		try {
-			System.out.println(this.tradeService.getTrade(100));
+			this.tradeService.getTrade(100);
 		} catch (NotFoundException e) {
 			assertTrue(true);
 		} catch (Exception ex) {
@@ -199,6 +231,53 @@ public class ServiceNegativeTest {
 		}
 	}
 
+	@Test
+	@DisplayName("find all cancel trades of invalid trade")
+	public void Get_cancelTrades_failure() {
+		when(this.tradeRepository.findAll()).thenReturn(allTrades);
+		when(this.cancelRepository.findAll()).thenReturn(allCancelTrades);
+		when(this.tradeRepository.findById(100)).thenReturn(Optional.empty());
+		try {
+			this.tradeService.getCancelTrades(100);
+		} catch (NotFoundException e) {
+			assertTrue(true);
+		} catch (Exception ex) {
+			assertTrue(false);
+		}
+	}
+
+	@Test
+	@DisplayName("update invalid trade")
+	public void Get_updateTrade_failure() {
+		when(this.tradeRepository.findAll()).thenReturn(allTrades);
+		when(this.cancelRepository.findAll()).thenReturn(allCancelTrades);
+		when(this.tradeRepository.findById(100)).thenReturn(Optional.empty());
+		try {
+
+			TradeUpdateBody body = new TradeUpdateBody();
+			this.tradeService.updateTrade(100, body);
+		} catch (NotFoundException e) {
+			assertTrue(true);
+		} catch (Exception ex) {
+			assertTrue(false);
+		}
+	}
+
+	@Test
+	@DisplayName("delete invalid trade")
+	public void delete_Trade_failure() {
+		when(this.tradeRepository.findAll()).thenReturn(allTrades);
+		when(this.cancelRepository.findAll()).thenReturn(allCancelTrades);
+		when(this.tradeRepository.findById(100)).thenReturn(Optional.empty());
+		try {
+			this.tradeService.deleteTrade(100);
+		} catch (NotFoundException e) {
+			assertTrue(true);
+		} catch (Exception ex) {
+			assertTrue(false);
+		}
+	}
+
 	// ----------------------------------------------------------
 	@Test
 	@DisplayName("find institution by Id")
@@ -207,6 +286,34 @@ public class ServiceNegativeTest {
 
 		try {
 			this.institutionService.getInstitution(100);
+		} catch (NotFoundException e) {
+			assertTrue(true);
+		} catch (Exception ex) {
+			assertTrue(false);
+		}
+	}
+
+	@Test
+	@DisplayName("find all parties of invalid institution")
+	public void Get_allParties_failure() {
+		when(this.institutionRepository.findById(100)).thenReturn(Optional.empty());
+
+		try {
+			this.institutionService.getParties(100);
+		} catch (NotFoundException e) {
+			assertTrue(true);
+		} catch (Exception ex) {
+			assertTrue(false);
+		}
+	}
+
+	@Test
+	@DisplayName("add party in invalid institution")
+	public void save_addPartyInvalidInstitution_failure() {
+		when(this.institutionRepository.findById(100)).thenReturn(Optional.empty());
+
+		try {
+			this.institutionService.addParty(100, 2);
 		} catch (NotFoundException e) {
 			assertTrue(true);
 		} catch (Exception ex) {
@@ -229,6 +336,34 @@ public class ServiceNegativeTest {
 	}
 
 	@Test
+	@DisplayName("add invalid party in institution")
+	public void save_addInvalidPartyInInstitution_failure() {
+		when(this.institutionRepository.findById(10)).thenReturn(Optional.of(I_1));
+		when(this.partyRepository.findById(1)).thenReturn(Optional.empty());
+		try {
+			this.institutionService.addParty(10, 100);
+		} catch (NotFoundException e) {
+			assertTrue(true);
+		} catch (Exception ex) {
+			assertTrue(false);
+		}
+	}
+
+	@Test
+	@DisplayName("add party in invalid institution")
+	public void save_addPartyInInvalidInstitution_failure() {
+		when(this.institutionRepository.findById(100)).thenReturn(Optional.empty());
+		when(this.partyRepository.findById(1)).thenReturn(Optional.of(PARTY_1));
+		try {
+			this.institutionService.addParty(100, 1);
+		} catch (NotFoundException e) {
+			assertTrue(true);
+		} catch (Exception ex) {
+			assertTrue(false);
+		}
+	}
+
+	@Test
 	@DisplayName("add already added institution")
 	public void save_addInstitution_failure() {
 		when(this.institutionRepository.findByInstitutionName("PNB")).thenReturn(I_1);
@@ -236,6 +371,59 @@ public class ServiceNegativeTest {
 			InstitutionBody body = new InstitutionBody(20, "PNB", new int[] { 1, 2 });
 			this.institutionService.addInstitution(body);
 		} catch (FoundException e) {
+			assertTrue(true);
+		} catch (Exception ex) {
+			assertTrue(false);
+		}
+	}
+
+	@Test
+	@DisplayName("update a invalid institution")
+	public void update_Institution_failure() {
+		when(this.institutionRepository.findById(100)).thenReturn(Optional.empty());
+		try {
+			InstitutionBody body = new InstitutionBody(20, "PNB", new int[] { 1, 2 });
+			this.institutionService.updateInstitution(100, body);
+		} catch (NotFoundException e) {
+			assertTrue(true);
+		} catch (Exception ex) {
+			assertTrue(false);
+		}
+	}
+
+	@Test
+	@DisplayName("delete a invalid institution")
+	public void delete_Institution_failure() {
+		when(this.institutionRepository.findById(100)).thenReturn(Optional.empty());
+		try {
+			this.institutionService.deleteInstitution(100);
+		} catch (NotFoundException e) {
+			assertTrue(true);
+		} catch (Exception ex) {
+			assertTrue(false);
+		}
+	}
+
+	@Test
+	@DisplayName("remove party from invalid institution")
+	public void save_removePartyInvalidInstitution_failure() {
+		when(this.institutionRepository.findById(100)).thenReturn(Optional.empty());
+		try {
+			this.institutionService.removeParty(100, 1);
+		} catch (NotFoundException e) {
+			assertTrue(true);
+		} catch (Exception ex) {
+			assertTrue(false);
+		}
+	}
+
+	@Test
+	@DisplayName("remove invalid party from institution")
+	public void save_removeInvalidPartyInstitution_failure() {
+		when(this.institutionRepository.findById(10)).thenReturn(Optional.of(I_1));
+		try {
+			this.institutionService.removeParty(10, 100);
+		} catch (NotFoundException e) {
 			assertTrue(true);
 		} catch (Exception ex) {
 			assertTrue(false);
@@ -282,4 +470,74 @@ public class ServiceNegativeTest {
 			assertTrue(false);
 		}
 	}
+
+	@Test
+	@DisplayName("add a already added party")
+	public void save_AddedParty_failure() {
+		when(this.partyRepository.findByPartyName("PNBR")).thenReturn(PARTY_1);
+		try {
+			PartyBody partyBody = new PartyBody(9, "PNBR", "PNB FARIDABAD", 100);
+			this.partyService.addParty(partyBody);
+		} catch (FoundException e) {
+			assertTrue(true);
+		} catch (Exception ex) {
+			assertTrue(false);
+		}
+	}
+
+	@Test
+	@DisplayName("update a invalid party")
+	public void update_party_failure() {
+		when(this.partyRepository.findById(100)).thenReturn(Optional.empty());
+		try {
+			PartyBody partyBody = new PartyBody(9, "PNBF", "PNB FARIDABAD", 100);
+			this.partyService.updateParty(100, partyBody);
+		} catch (NotFoundException e) {
+			assertTrue(true);
+		} catch (Exception ex) {
+			assertTrue(false);
+		}
+	}
+
+	@Test
+	@DisplayName("update a party with invalid institution")
+	public void update_partyInstitution_failure() {
+		when(this.partyRepository.findById(9)).thenReturn(Optional.of(PARTY_9));
+		when(this.institutionRepository.findById(100)).thenReturn(Optional.empty());
+		PartyBody partyBody = new PartyBody(9, "PNBF", "PNB FARIDABAD", 100);
+		try {
+			this.partyService.updateParty(9, partyBody);
+		} catch (NotFoundException e) {
+			assertTrue(true);
+		} catch (Exception ex) {
+			assertTrue(false);
+		}
+	}
+
+	@Test
+	@DisplayName("delete invalid party")
+	public void delete_partyInstitution_failure() {
+		when(this.partyRepository.findById(100)).thenReturn(Optional.empty());
+		try {
+			this.partyService.deleteParty(100);
+		} catch (NotFoundException e) {
+			assertTrue(true);
+		} catch (Exception ex) {
+			assertTrue(false);
+		}
+	}
+
+	@Test
+	@DisplayName("get institution of invalid party")
+	public void get_Invalidinstitution_failure() {
+		when(this.partyRepository.findById(100)).thenReturn(Optional.empty());
+		try {
+			this.partyService.getInstitution(100);
+		} catch (NotFoundException e) {
+			assertTrue(true);
+		} catch (Exception ex) {
+			assertTrue(false);
+		}
+	}
+
 }

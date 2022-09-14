@@ -15,6 +15,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import io.swagger.annotations.Api;
@@ -24,6 +25,7 @@ import io.swagger.annotations.ApiModel;
 @Api(value = "Institution")
 @Entity
 @Table(name = "institution")
+@JsonIgnoreProperties(value = { "allParties" })
 public class Institution {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

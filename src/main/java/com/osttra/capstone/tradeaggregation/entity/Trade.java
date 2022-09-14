@@ -19,6 +19,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import io.swagger.annotations.Api;
@@ -28,6 +29,7 @@ import io.swagger.annotations.ApiModel;
 @Api("Trade")
 @Entity
 @Table(name = "trade")
+@JsonIgnoreProperties(value = { "aggregatedFrom" })
 public class Trade {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -99,6 +101,7 @@ public class Trade {
 			@NotNull(message = "version timestamp is required") Date versionTimeStamp, Date confirmationTimeStamp,
 			int version,
 			@Size(max = 50, message = "status length cant be more than 50") @NotNull(message = "status is required") String status,
+			List<CancelTrade> aggregatedFrom,
 			@Min(value = 1, message = "institution id is required") int institutionId) {
 		super();
 		this.tradeId = tradeId;
@@ -120,6 +123,7 @@ public class Trade {
 		this.confirmationTimeStamp = confirmationTimeStamp;
 		this.version = version;
 		this.status = status;
+		this.aggregatedFrom = aggregatedFrom;
 		this.institutionId = institutionId;
 	}
 

@@ -149,7 +149,23 @@ class PartyServiceTest {
 	}
 
 	@Test
-	@DisplayName("update a party")
+	@DisplayName("update party with institution")
+	public void update_partyInstitution_success() {
+		PartyBody partyBody = new PartyBody(9, "PNBF", "PNB FARIDABAD", 10);
+		Party newParty = new Party(9, "PNBF", "PNB FARIDABAD");
+		when(this.partyrepository.findById(9)).thenReturn(Optional.of(newParty));
+		when(this.partyrepository.save(any(Party.class))).thenReturn(newParty);
+		when(this.institutionrepository.findById(10)).thenReturn(Optional.of(I_1));
+
+		CustomResponse<Party> act = this.partyservice.updateParty(9, partyBody);
+		List<Party> list = act.getData();
+		boolean res = list.size() == 1 && list.get(0).getInstitution().getInstitutionId() == 10
+				&& list.get(0).getPartyName().equals(newParty.getPartyName());
+		assertTrue(res);
+	}
+
+	@Test
+	@DisplayName("update a party with other details")
 	public void update_party_success() {
 		PartyBody partyBody = new PartyBody(1, "PNBR", "PNB RAIPUR", 10);
 		when(this.partyrepository.findByPartyName("PNBF")).thenReturn(null);

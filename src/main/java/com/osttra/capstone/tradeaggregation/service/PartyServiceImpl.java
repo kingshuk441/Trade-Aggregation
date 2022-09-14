@@ -101,7 +101,7 @@ public class PartyServiceImpl implements PartyService {
 		if (institutionId != 0 && party.get().getInstitution() == null) {
 			Optional<Institution> i = this.institutionRepository.findById(institutionId);
 			if (i.isEmpty()) {
-				throw new NotFoundException("Institution with id " + partyId + " not found!");
+				throw new NotFoundException("Institution with id " + institutionId + " not found!");
 			}
 			party.get().setInstitution(i.get());
 		}
