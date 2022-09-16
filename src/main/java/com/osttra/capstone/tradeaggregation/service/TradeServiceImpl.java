@@ -209,6 +209,9 @@ public class TradeServiceImpl implements TradeService {
 		if (trade.isEmpty()) {
 			throw new NotFoundException("trade with Id " + tradeId + " not found!");
 		}
+		if (trade.get().getStatus().equals("AGG")) {
+			throw new RuntimeException("Aggregated trade cant be updated!");
+		}
 
 		TradeBuilder tb = new TradeBuilder(trade.get(), body, partyRepository);
 		Trade newTrade = tb.getTrade();
